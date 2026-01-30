@@ -5,10 +5,10 @@ This example shows how to:
 - Get time-series data for specific metrics (e.g., Production, Consumption)
 - Specify time ranges and binning intervals
 - Access data in both series and table formats
+- Handle multiple metrics and error responses
 """
 
 from datetime import datetime
-import json
 import pprint
 from zoneinfo import ZoneInfo
 
@@ -25,7 +25,6 @@ start_date = datetime(2025, 1, 1, tzinfo=AEST)
 end_date = datetime(2025, 1, 7, tzinfo=AEST)
 
 # Example 1: Get time series data for Production
-print("Fetching solar production data...")
 series = get_ts_series_detailed(
     sites=["demo1"],  # Replace with actual device ref
     client=client,
@@ -40,16 +39,16 @@ series = get_ts_series_detailed(
 # Use series.parsed for easy access.
 if series.parsed:
     print("\nProduction data retrieved:") 
-    print(json.dumps(series.parsed, indent=4))
+    pprint.pprint(series.parsed['demo1'], indent=4)
 
 
 
     
 # Example 2: Get data in table format (easier for analysis)
 print("\n" + "=" * 60)
-print("Fetching data in table format...")
+print("Fetching multiple sites with data in table format...")
 table = get_ts_table_detailed(
-    sites=["demo_device_01", "demo_device_02"],  # Multiple devices
+    sites=["demo1","demo2"],  # Multiple devices
     client=client,
     start=start_date,
     stop=end_date,
@@ -57,29 +56,46 @@ table = get_ts_table_detailed(
 )
 
 if table.parsed:
-    print(f"\nTable data retrieved:")
-    for site, data in table.parsed.items():
-        print(f"\n  Site: {site}")
-        print(f"    Data type: {type(data)}")
-        # Table format typically includes timestamps and all available metrics
-
+    print("\nTable data retrieved:")
+    for site in table.parsed.additional_keys:
+        print(f"  Site: {site}")
+        pprint.pprint(table.parsed[site], indent=4)
+    
 # Example 3: Get multiple metrics
 print("\n" + "=" * 60)
-print("Fetching multiple metrics...")
+
 multi_series = get_ts_series_detailed(
-    sites=["demo_device_01"],
+    sites=["demo1"],
     client=client,
     start=start_date,
     stop=end_date,
-    bin_="1h",  # Hourly data
-    mets=["Production", "Consumption", "FeedIn"],
-    units="W",
+    bin_="1d",  
+    metcat=["load"], 
+    units="kWh/day",
 )
 
 if multi_series.parsed:
-    for site, metrics in multi_series.parsed.items():
-        print(f"\n  Site: {site}")
-        for metric_name, values in metrics.items():
-            if values:
-                avg_value = sum(v[1] for v in values if v[1]) / len([v for v in values if v[1]])
-                print(f"    {metric_name}: {len(values)} readings, avg = {avg_value:.2f} W")
+    print("\nMultiple metrics data retrieved:")
+    pprint.pprint(multi_series.parsed['demo1'], indent=4)
+else:
+    print("No data retrieved: ", multi_series)
+        
+# Example 4: View the error
+print("\n" + "=" * 60)
+print("Attempting to fetch data with invalid parameters...")
+invalid_series = get_ts_series_detailed(
+    sites=["demo1"],
+    client=client,
+    start=start_date,
+    stop=end_date,
+    bin_="1h",  
+    metcat=["InvalidMetric"],  # Invalid metric
+    units="W",
+)
+if invalid_series.parsed:
+    print("Data retrieved (unexpected!)")
+else:
+    print("OK: the expected error occurred.")
+    # View the response by uncommenting the line below.")
+    # pprint.pprint(invalid_series)     
+    

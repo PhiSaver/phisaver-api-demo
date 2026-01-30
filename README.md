@@ -21,7 +21,7 @@ Existing users can use their email and password to access their data.
 
 The demo account has an *unchanging* token for convenience. Production accounts will have rotating tokens.
 
-**Demo Credentials** (for testing):
+**Demo Credentials**:
 - **URL**: `https://app.phisaver.com`
 - **Username**: `demo@phisaver.com`
 - **Password**: `checkthewebsiteoremailsupport`
@@ -29,7 +29,7 @@ The demo account has an *unchanging* token for convenience. Production accounts 
 
 ## Quick Start
 
-The quickest way to explore the API is using [HTTPie](https://httpie.io/), a user-friendly command-line HTTP client. You could also use `curl` or `wget`.
+The quickest way to explore the API is using [HTTPie](https://httpie.io/), a user-friendly command-line HTTP client. You could also use `curl` or `wget`. 
 
 ```bash
 # Install HTTPie
@@ -43,7 +43,8 @@ export PHISAVER_PASSWORD="your_password"
 # Authenticate and save token
 export TOKEN=$(http POST $PHISAVER_URL/api/v1/login/ \
   email="$PHISAVER_USERNAME" \
-  password="$PHISAVER_PASSWORD" | jq -r '.key')
+  password="$PHISAVER_PASSWORD" \
+  | python3 -c "import sys, json; print(json.load(sys.stdin)['key'])")
 
 # Get time-series energy data
 http GET $PHISAVER_URL/api/v1/ts/series/ \
@@ -248,6 +249,9 @@ Contact PhiSaver support at [support@phisaver.com](mailto:support@phisaver.com).
 
 ### I'm getting a SSL certificate error. What should I do?
 System-wide `httpie` may be using an outdated CA bundle. Try installing `httpie` in a Python virtual environment to get an up-to-date CA bundle. Alternatively, update your system's CA certificates. Alternatively, you can bypass SSL verification (not recommended for production) with the `--verify=no` flag in HTTPie:
+
+### What's with the `==` syntax in HTTPie?
+The use of "==" in HTTPie indicates query parameters, and "=" indicates headers or JSON body fields.
 
 ## Requirements
 

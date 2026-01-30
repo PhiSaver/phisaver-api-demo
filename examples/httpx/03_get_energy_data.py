@@ -1,7 +1,11 @@
 """
 Retrieve time-series energy data using httpx
 
-This example shows how to fetch time-series energy data using raw httpx.
+This example shows how to:
+- Get time-series data for specific metrics (e.g., Production, Consumption)
+- Specify time ranges and binning intervals
+- Access data in both series and table formats
+- Handle multiple metrics and error responses
 """
 
 import os
@@ -33,13 +37,14 @@ if auth_response.status_code != 200:
 token = auth_response.json()["key"]
 print("Authenticated\n")
 
-# Step 2: Define time range
+# Define time range and timezone
 AEST = ZoneInfo("Australia/Brisbane")
 start_date = datetime(2025, 1, 1, tzinfo=AEST)
 end_date = datetime(2025, 1, 7, tzinfo=AEST)
 
-# Step 3: Get time series data
-print("Fetching solar production data...")
+# Example 1: Get time series data for Production
+print("=" * 60)
+print("Fetching time series data...")
 series_response = httpx.get(
     f"{base_url}/api/v1/ts/series/",
     headers={"Authorization": f"Token {token}"},
@@ -47,42 +52,29 @@ series_response = httpx.get(
         "sites": "demo1",
         "start": start_date.isoformat(),
         "stop": end_date.isoformat(),
-        "bin": "1d",  # Daily bins
-        "mets": "Consumption,Production",  # Comma-separated metrics
-        "units": "W",
+        "bin": "1d",  # Daily bins: 1d, 1h, 15min, etc.
+        "mets": "Consumption,Production",  # Metrics: Production, Consumption, etc.
+        "units": "W",  # Units: W, kW, kWh/day
     },
 )
 
-if series_response.status_code != 200:
-    print(f"Failed to fetch data: {series_response.status_code}")
+if series_response.status_code == 200:
+    data = series_response.json()
+    print("\nProduction data retrieved:")
+    print(json.dumps(data, indent=4))
+else:
+    print(f"Failed: {series_response.status_code}")
     print(series_response.text)
-    exit(1)
 
-data = series_response.json()
-print("Data retrieved\n")
-print(json.dumps(data, indent=2))
-
-# Step 4: Process and display the data
+# Example 2: Get data in table format (easier for analysis)
 print("\n" + "=" * 60)
-print("Processing data...")
-
-for site, metrics in data.items():
-    print(f"\nSite: {site}")
-    for metric_name, values in metrics.items():
-        print(f"  {metric_name}:")
-        for timestamp, value in values:
-            if value is not None:
-                print(f"    {timestamp}: {value:.2f} W")
-
-# Step 5: Get table format data
-print("\n" + "=" * 60)
-print("Fetching data in table format...")
+print("Fetching multiple sites with data in table format...")
 
 table_response = httpx.get(
     f"{base_url}/api/v1/ts/table/",
     headers={"Authorization": f"Token {token}"},
     params={
-        "sites": "demo1",
+        "sites": "demo1,demo2",  # Multiple devices
         "start": start_date.isoformat(),
         "stop": end_date.isoformat(),
         "units": "kWh/day",
@@ -91,14 +83,16 @@ table_response = httpx.get(
 
 if table_response.status_code == 200:
     table_data = table_response.json()
-    print("Table data retrieved")
-    print(json.dumps(table_data, indent=2)[:500] + "...")
+    print("\nTable data retrieved:")
+    for site, metrics in table_data.items():
+        print(f"  Site: {site}")
+        print(json.dumps(metrics, indent=4))
 else:
     print(f"Failed: {table_response.status_code}")
 
-# Step 6: Get multiple metrics with hourly bins
+# Example 3: Get multiple metrics by category
 print("\n" + "=" * 60)
-print("Fetching multiple metrics (hourly)...")
+print("Fetching metrics by category (load)...")
 
 multi_response = httpx.get(
     f"{base_url}/api/v1/ts/series/",
@@ -107,23 +101,40 @@ multi_response = httpx.get(
         "sites": "demo1",
         "start": start_date.isoformat(),
         "stop": end_date.isoformat(),
-        "bin": "1h",  # Hourly bins
-        "mets": "Production,Consumption,FeedIn",
-        "units": "W",
+        "bin": "1d",
+        "metcat": "load",  # Category: load, production, battery, etc.
+        "units": "kWh/day",
     },
 )
 
 if multi_response.status_code == 200:
     multi_data = multi_response.json()
-    print("Multi-metric data retrieved\n")
-    
-    for site, metrics in multi_data.items():
-        print(f"Site: {site}")
-        for metric_name, values in metrics.items():
-            # Calculate average
-            valid_values = [v for ts, v in values if v is not None]
-            if valid_values:
-                avg_value = sum(valid_values) / len(valid_values)
-                print(f"  {metric_name}: {len(values)} readings, avg = {avg_value:.2f} W")
+    print("\nMultiple metrics data retrieved:")
+    print(json.dumps(multi_data, indent=4))
 else:
     print(f"Failed: {multi_response.status_code}")
+
+# Example 4: View the error response
+print("\n" + "=" * 60)
+print("Attempting to fetch data with invalid parameters...")
+
+invalid_response = httpx.get(
+    f"{base_url}/api/v1/ts/series/",
+    headers={"Authorization": f"Token {token}"},
+    params={
+        "sites": "demo1",
+        "start": start_date.isoformat(),
+        "stop": end_date.isoformat(),
+        "bin": "1h",
+        "metcat": "InvalidMetric",  # Invalid metric category
+        "units": "W",
+    },
+)
+
+if invalid_response.status_code == 200:
+    print("Data retrieved (unexpected!)")
+else:
+    print("OK: the expected error occurred.")
+    print(f"Status: {invalid_response.status_code}")
+    # View the error response by uncommenting the line below
+    # print(invalid_response.text)

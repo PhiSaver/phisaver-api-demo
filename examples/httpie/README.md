@@ -42,13 +42,28 @@ http POST $PHISAVER_URL/api/v1/login/ \
 }
 ```
 
-**Save the token for later use:**
+**Save the token:**
 ```bash
 export TOKEN=$(http POST $PHISAVER_URL/api/v1/login/ \
   email="$PHISAVER_USERNAME" \
-  password="$PHISAVER_PASSWORD" | jq -r '.key')
+  password="$PHISAVER_PASSWORD" \
+  | python3 -c "import sys, json; print(json.load(sys.stdin)['key'])")
 
 echo "Token: $TOKEN"
+```
+
+**Alternative: HTTPie Sessions (cookie-based):**
+
+HTTPie sessions use cookies instead of tokens:
+
+```bash
+# Login with session - saves cookies automatically
+http --session=phisaver POST $PHISAVER_URL/api/v1/login/ \
+  email="$PHISAVER_USERNAME" \
+  password="$PHISAVER_PASSWORD"
+
+# Subsequent requests use saved cookies
+http --session=phisaver GET $PHISAVER_URL/api/v1/devices/
 ```
 
 ## 02. List Devices
@@ -66,15 +81,16 @@ http GET $PHISAVER_URL/api/v1/devices/demo1/ \
   "Authorization:Token $TOKEN"
 ```
 
-**Pretty print with jq:**
-```bash
-http GET $PHISAVER_URL/api/v1/devices/ \
-  "Authorization:Token $TOKEN" | jq '.[] | {name, ref, solar, timezone}'
-```
-
 ## 03. Get Energy Data
 
-**Get time-series data (daily bins):**
+This section demonstrates:
+- Getting time-series data for specific metrics
+- Using different binning intervals and time ranges
+- Accessing data in table format for analysis
+- Querying metrics by category
+- Handling error responses
+
+### Example 1: Time-Series Data (Daily Bins)
 
 ```bash
 http GET $PHISAVER_URL/api/v1/ts/series/ \
@@ -87,42 +103,50 @@ http GET $PHISAVER_URL/api/v1/ts/series/ \
   units==W
 ```
 
-**Get hourly data:**
+### Example 2: Table Format (Multiple Sites)
 
-```bash
-http GET $PHISAVER_URL/api/v1/ts/series/ \
-  "Authorization:Token $TOKEN" \
-  sites==demo1 \
-  start=="2025-01-01T00:00:00+10:00" \
-  stop=="2025-01-02T00:00:00+10:00" \
-  bin==1h \
-  mets==Production \
-  units==kWh/day
-```
-
-**Get table format data:**
+Get aggregated data for multiple devices:
 
 ```bash
 http GET $PHISAVER_URL/api/v1/ts/table/ \
   "Authorization:Token $TOKEN" \
-  sites==demo1 \
+  sites==demo1,demo2 \
   start=="2025-01-01T00:00:00+10:00" \
   stop=="2025-01-07T00:00:00+10:00" \
   units==kWh/day
 ```
 
-**Multiple sites:**
+### Example 3: Metrics by Category
+
+Query all metrics in a category (e.g., all load circuits):
 
 ```bash
 http GET $PHISAVER_URL/api/v1/ts/series/ \
   "Authorization:Token $TOKEN" \
-  sites==demo1,demo2 \
+  sites==demo1 \
   start=="2025-01-01T00:00:00+10:00" \
   stop=="2025-01-07T00:00:00+10:00" \
   bin==1d \
-  mets==Production \
+  metcat==load \
   units==kWh/day
 ```
+
+### Example 4: Error Handling
+
+Attempt an invalid query to see error response:
+
+```bash
+http GET $PHISAVER_URL/api/v1/ts/series/ \
+  "Authorization:Token $TOKEN" \
+  sites==demo1 \
+  start=="2025-01-01T00:00:00+10:00" \
+  stop=="2025-01-07T00:00:00+10:00" \
+  bin==1h \
+  metcat==InvalidMetric \
+  units==W
+```
+
+This will return an error response showing which parameters are invalid.
 
 ## Tips
 
@@ -151,17 +175,6 @@ http -v GET $PHISAVER_URL/api/v1/devices/ \
   "Authorization:Token $TOKEN"
 ```
 
-**Use sessions (auto-saves token):**
-```bash
-# Create session
-http --session=phisaver POST $PHISAVER_URL/api/v1/auth/token/login/ \
-  username="$PHISAVER_USERNAME" \
-  password="$PHISAVER_PASSWORD"
-
-# Subsequent requests use the session
-http --session=phisaver GET $PHISAVER_URL/api/v1/devices/
-```
-
 ## Query Parameters
 
 Common parameters for `/ts/series/` endpoint:
@@ -170,7 +183,7 @@ Common parameters for `/ts/series/` endpoint:
 - `start` - Start time (ISO8601 format with timezone)
 - `stop` - Stop time (ISO8601 format with timezone)
 - `bin` - Bin duration (`1h`, `30min`, `1d`, `1M`)
-- `mets` - Comma-separated metric names (`Production`, `Consumption`, `FeedIn`)
+- `mets` - Comma-separated metric names (`Production`, `Consumption`, `Export`)
 - `units` - Units of measurement (`W`, `kW`, `kWh`, `kWh/day`, `$/day`)
 - `format` - Response format (`json`, `csv`)
 - `timezone` - IANA timezone string (e.g., `Australia/Brisbane`)

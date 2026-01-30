@@ -21,6 +21,9 @@ COPY README.md README.md
 # Install Python packages
 ARG PYPI_INDEX=https://test.pypi.org/simple/
 RUN pip install --no-cache-dir \
+    --disable-pip-version-check \
+    --root-user-action=ignore \
+    --quiet \
     --index-url ${PYPI_INDEX} \
     --extra-index-url https://pypi.org/simple/ \
     phisaver-client httpx httpie
