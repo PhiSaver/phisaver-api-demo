@@ -33,28 +33,30 @@ The quickest way to explore the API is using [HTTPie](https://httpie.io/), a use
 
 ```bash
 # Install HTTPie
-apt install httpie  # Linux (use brew or python pip on other OSes)
+apt install httpie  # Linux (use brew on mac, or pip, and refer to note re certificates in FAQ)
+
 
 # Set credentials as environment variables
 export PHISAVER_URL="https://app.phisaver.com"
 export PHISAVER_USERNAME="your_email@example.com"
 export PHISAVER_PASSWORD="your_password"
 
-# Authenticate and save token
-export TOKEN=$(http POST $PHISAVER_URL/api/v1/login/ \
+# Authenticate and save token 
+# See FAQ regarding --no-verify option for SSL certificates
+export TOKEN=$(http --no-verify POST $PHISAVER_URL/api/v1/login/ \
   email="$PHISAVER_USERNAME" \
   password="$PHISAVER_PASSWORD" \
   | python3 -c "import sys, json; print(json.load(sys.stdin)['key'])")
 
-# Get time-series energy data
-http GET $PHISAVER_URL/api/v1/ts/series/ \
+# Get time-series energy data 
+http --no-verify GET $PHISAVER_URL/api/v1/ts/series/ \
   "Authorization:Token $TOKEN" \
   sites==demo1 \
   start=="2025-01-01T00:00:00+10:00" \
   stop=="2025-01-07T00:00:00+10:00" \
   bin==1d \
   mets==Production \
-  units==kWh
+  units==kWh/day 
 ```
 
 ## Three Ways to Interact with the PhiSaver API
@@ -65,10 +67,12 @@ http GET $PHISAVER_URL/api/v1/ts/series/ \
 
 HTTPie is a simple, intuitive command-line HTTP client with JSON, sessions and colorized output. 
 
+
+
 **Installation:**
 ```bash
 brew install httpie  # macOS
-apt install httpie   # Linux
+apt install httpie   # Linux (see FAQ re certificates below)
 pip install httpie   # Python
 ```
 
@@ -224,7 +228,7 @@ bin==1d start=="2025-01-01T00:00:00+10:00" stop=="2025-01-07T00:00:00+10:00"
 
 ```bash
 # Get daily production and consumption for multiple devices
-http GET $PHISAVER_URL/api/v1/ts/series/ \
+http --no-verify GET $PHISAVER_URL/api/v1/ts/series/ \
   "Authorization:Token $TOKEN" \
   sites==demo1,demo2 \
   start=="2025-01-01T00:00:00+10:00" \
@@ -248,7 +252,7 @@ Contact PhiSaver support at [support@phisaver.com](mailto:support@phisaver.com).
 **No.** The PhiSaver API requires HTTPS for all requests. HTTP connections will be rejected. This ensures your credentials and energy data remain encrypted in transit.
 
 ### I'm getting a SSL certificate error. What should I do?
-System-wide `httpie` may be using an outdated CA bundle. Try installing `httpie` in a Python virtual environment to get an up-to-date CA bundle. Alternatively, update your system's CA certificates. Alternatively, you can bypass SSL verification (not recommended for production) with the `--verify=no` flag in HTTPie:
+System-wide `httpie` may be using an outdated CA bundle. Try installing `httpie` in a Python virtual environment to get an up-to-date CA bundle. Alternatively, update your system's CA certificates. Alternatively, you can bypass SSL verification (not recommended for production) with the `--verify=no` flag in HTTPie.
 
 ### What's with the `==` syntax in HTTPie?
 The use of "==" in HTTPie indicates query parameters, and "=" indicates headers or JSON body fields.
