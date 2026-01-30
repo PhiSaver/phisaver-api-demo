@@ -76,8 +76,9 @@ apt install httpie   # Linux (see FAQ re certificates below)
 pip install httpie   # Python
 ```
 
-**[HTTPie README](examples/httpie/README.md)** 
-**[HTTPie examples](examples/httpie/)** 
+More:
+- [HTTPie README](examples/httpie/README.md)
+- [HTTPie examples](examples/httpie/)
 
 ---
 
@@ -92,7 +93,8 @@ Direct HTTP requests using the modern `httpx` library without the generated clie
 pip install httpx
 ```
 
-**[httpx examples](examples/httpx/)** - Complete Python scripts using httpx
+More:
+- [httpx examples](examples/httpx/)
 
 ---
 
@@ -106,11 +108,13 @@ Auto-generated Python client library with type hints and full API coverage.
 ```bash
 pip install phisaver-client --index-url https://test.pypi.org/simple/ --extra-index-url https://pypi.org/simple/
 ```
-
-**[phisaver-client README](examples/phisaver-client/README.md)**
-**[phisaver-client examples](examples/)** - Complete Python scripts using phisaver-client
+More:
+- [phisaver-client README](examples/phisaver-client/README.md)
+- [phisaver-client examples](examples/phisaver-client/) 
 
 ## API Details
+
+The examples given use httpie, but the same parameters apply to all methods of interacting with the API. Check the FAQ about '==' syntax in HTTPie.
 
 ### Time Ranges
 
@@ -185,20 +189,18 @@ mets==Production,AirConditioner,HotWater
 
 ### Units
 
-Units differ between `/ts/series/` and `/ts/table/` endpoints:
+Units differ between between power (Watts) and energy (kWh) data. Where data is 'binned' into intervals (e.g., daily totals), the average of that interval is returned by default.
 
-**For /ts/series/ (time-series data):**
-- `W` (default) - Instantaneous power in watts
-- `kW` - Instantaneous power in kilowatts
-
-**For /ts/table/ (aggregated data):**
+** Common units:**
+- `W` (recommended) - Instantaneous power in watts 
 - `kWh/day` (recommended) - Energy per day
-- `$/day` - Cost per day
+- `kW` - Instantaneous power in kilowatts
+- `$/day` - Cost per day with tariff applied
 
 **Example:**
 ```bash
 # Time-series with instantaneous power
-/api/v1/ts/series/ ... units==kW
+/api/v1/ts/series/ ... units==W
 
 # Table with daily energy
 /api/v1/ts/table/ ... units==kWh/day
@@ -210,7 +212,6 @@ Group data into time intervals using the `bin` parameter (only for `/ts/series/`
 
 **Common bins:**
 - `1h` - Hourly
-- `30min` - Half-hourly
 - `1d` - Daily
 - `1ME` - Month-end
 - `1W` - Weekly
@@ -224,23 +225,6 @@ bin==1h start=="2025-01-01T00:00:00+10:00" stop=="2025-01-02T00:00:00+10:00"
 bin==1d start=="2025-01-01T00:00:00+10:00" stop=="2025-01-07T00:00:00+10:00"
 ```
 
-### Complete Example
-
-```bash
-# Get daily production and consumption for multiple devices
-http --no-verify GET $PHISAVER_URL/api/v1/ts/series/ \
-  "Authorization:Token $TOKEN" \
-  sites==demo1,demo2 \
-  start=="2025-01-01T00:00:00+10:00" \
-  stop=="2025-01-31T00:00:00+10:00" \
-  bin==1d \
-  mets==Production,Consumption \
-  units==kW \
-  timeformat==iso \
-  format==json
-```
-
-See [examples/API_REFERENCE.md](examples/API_REFERENCE.md) for detailed parameter documentation.
 
 ## FAQ
 
