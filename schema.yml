@@ -1,0 +1,2308 @@
+openapi: 3.0.3
+info:
+  title: Phisaver API
+  version: 1.0.0
+  description: API for the PhiSaver Energy Monitor
+paths:
+  /api/v1/devices/:
+    get:
+      operationId: devices_list
+      tags:
+      - devices
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Device'
+          description: ''
+    post:
+      operationId: devices_create
+      tags:
+      - devices
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Device'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Device'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Device'
+        required: true
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Device'
+          description: ''
+  /api/v1/devices/{ref}/:
+    get:
+      operationId: devices_retrieve
+      parameters:
+      - in: path
+        name: ref
+        schema:
+          type: string
+        required: true
+      tags:
+      - devices
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Device'
+          description: ''
+    put:
+      operationId: devices_update
+      parameters:
+      - in: path
+        name: ref
+        schema:
+          type: string
+        required: true
+      tags:
+      - devices
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Device'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Device'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Device'
+        required: true
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Device'
+          description: ''
+    patch:
+      operationId: devices_partial_update
+      parameters:
+      - in: path
+        name: ref
+        schema:
+          type: string
+        required: true
+      tags:
+      - devices
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedDevice'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedDevice'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedDevice'
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Device'
+          description: ''
+    delete:
+      operationId: devices_destroy
+      parameters:
+      - in: path
+        name: ref
+        schema:
+          type: string
+        required: true
+      tags:
+      - devices
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/v1/fleets/:
+    get:
+      operationId: fleets_list
+      description: |-
+        Enforces object-level permissions in ``rest_framework.viewsets.ViewSet``,
+        deriving the permission type from the particular action to be performed..
+
+        As with ``rules.contrib.views.AutoPermissionRequiredMixin``, this only works when
+        model permissions are registered using ``rules.contrib.models.RulesModelMixin``.
+      tags:
+      - fleets
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Fleet'
+          description: ''
+    post:
+      operationId: fleets_create
+      description: |-
+        Enforces object-level permissions in ``rest_framework.viewsets.ViewSet``,
+        deriving the permission type from the particular action to be performed..
+
+        As with ``rules.contrib.views.AutoPermissionRequiredMixin``, this only works when
+        model permissions are registered using ``rules.contrib.models.RulesModelMixin``.
+      tags:
+      - fleets
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Fleet'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Fleet'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Fleet'
+        required: true
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Fleet'
+          description: ''
+  /api/v1/fleets/{ref}/:
+    get:
+      operationId: fleets_retrieve
+      description: |-
+        Enforces object-level permissions in ``rest_framework.viewsets.ViewSet``,
+        deriving the permission type from the particular action to be performed..
+
+        As with ``rules.contrib.views.AutoPermissionRequiredMixin``, this only works when
+        model permissions are registered using ``rules.contrib.models.RulesModelMixin``.
+      parameters:
+      - in: path
+        name: ref
+        schema:
+          type: string
+        required: true
+      tags:
+      - fleets
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Fleet'
+          description: ''
+    put:
+      operationId: fleets_update
+      description: |-
+        Enforces object-level permissions in ``rest_framework.viewsets.ViewSet``,
+        deriving the permission type from the particular action to be performed..
+
+        As with ``rules.contrib.views.AutoPermissionRequiredMixin``, this only works when
+        model permissions are registered using ``rules.contrib.models.RulesModelMixin``.
+      parameters:
+      - in: path
+        name: ref
+        schema:
+          type: string
+        required: true
+      tags:
+      - fleets
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Fleet'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Fleet'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Fleet'
+        required: true
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Fleet'
+          description: ''
+    patch:
+      operationId: fleets_partial_update
+      description: |-
+        Enforces object-level permissions in ``rest_framework.viewsets.ViewSet``,
+        deriving the permission type from the particular action to be performed..
+
+        As with ``rules.contrib.views.AutoPermissionRequiredMixin``, this only works when
+        model permissions are registered using ``rules.contrib.models.RulesModelMixin``.
+      parameters:
+      - in: path
+        name: ref
+        schema:
+          type: string
+        required: true
+      tags:
+      - fleets
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedFleet'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedFleet'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedFleet'
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Fleet'
+          description: ''
+    delete:
+      operationId: fleets_destroy
+      description: |-
+        Enforces object-level permissions in ``rest_framework.viewsets.ViewSet``,
+        deriving the permission type from the particular action to be performed..
+
+        As with ``rules.contrib.views.AutoPermissionRequiredMixin``, this only works when
+        model permissions are registered using ``rules.contrib.models.RulesModelMixin``.
+      parameters:
+      - in: path
+        name: ref
+        schema:
+          type: string
+        required: true
+      tags:
+      - fleets
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/v1/login/:
+    post:
+      operationId: login_create
+      description: |-
+        Check the credentials and return the REST Token
+        if the credentials are valid and authenticated.
+        Calls Django Auth login method to register User ID
+        in Django session framework
+
+        Accept the following POST parameters: username, password
+        Return the REST Framework Token Object's key.
+      tags:
+      - login
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Login'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Login'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Login'
+        required: true
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Token'
+          description: ''
+  /api/v1/logout/:
+    post:
+      operationId: logout_create
+      description: |-
+        Calls Django logout method and delete the Token object
+        assigned to the current User object.
+
+        Accepts/Returns nothing.
+      tags:
+      - logout
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RestAuthDetail'
+          description: ''
+  /api/v1/password/change/:
+    post:
+      operationId: password_change_create
+      description: |-
+        Calls Django Auth SetPasswordForm save method.
+
+        Accepts the following POST parameters: new_password1, new_password2
+        Returns the success/fail message.
+      tags:
+      - password
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PasswordChange'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PasswordChange'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PasswordChange'
+        required: true
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RestAuthDetail'
+          description: ''
+  /api/v1/password/reset/:
+    post:
+      operationId: password_reset_create
+      description: |-
+        Calls Django Auth PasswordResetForm save method.
+
+        Accepts the following POST parameters: email
+        Returns the success/fail message.
+      tags:
+      - password
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PasswordReset'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PasswordReset'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PasswordReset'
+        required: true
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RestAuthDetail'
+          description: ''
+  /api/v1/password/reset/confirm/:
+    post:
+      operationId: password_reset_confirm_create
+      description: |-
+        Password reset e-mail link is confirmed, therefore
+        this resets the user's password.
+
+        Accepts the following POST parameters: token, uid,
+            new_password1, new_password2
+        Returns the success/fail message.
+      tags:
+      - password
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PasswordResetConfirm'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PasswordResetConfirm'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PasswordResetConfirm'
+        required: true
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RestAuthDetail'
+          description: ''
+  /api/v1/token/:
+    post:
+      operationId: token_create
+      tags:
+      - token
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/AuthToken'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/AuthToken'
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AuthToken'
+        required: true
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthToken'
+          description: ''
+  /api/v1/ts/heatmap/:
+    get:
+      operationId: ts_heatmap_retrieve
+      parameters:
+      - in: query
+        name: attribute
+        schema:
+          enum:
+          - power
+          - voltage
+          - current
+          - pf
+          - soc
+          - status
+          type: string
+          default: power
+          minLength: 1
+        description: |-
+          Attributes to return. Choices are ['power', 'voltage', 'current', 'pf', 'soc', 'status']. Default is 'power'.
+
+          * `power` - POWER
+          * `voltage` - VOLTAGE
+          * `current` - CURRENT
+          * `pf` - PF
+          * `soc` - SOC
+          * `status` - STATUS
+      - in: query
+        name: duration
+        schema:
+          type: string
+        description: 'Alternative to stop: a pandas compatible timedelta or plain
+          seconds'
+      - in: query
+        name: engine
+        schema:
+          enum:
+          - influx
+          - timescale
+          type: string
+          default: influx
+          minLength: 1
+        description: |-
+          Database engine to use for the query (one of ['influx', 'timescale'])
+
+          * `influx` - INFLUX
+          * `timescale` - TIMESCALE
+      - in: query
+        name: fleet
+        schema:
+          type: string
+          minLength: 1
+        description: fleet (e,g fleet1), equivalent to ?sites=site1,site2,site3
+      - in: query
+        name: format
+        schema:
+          type: string
+          enum:
+          - csv
+          - json
+      - in: query
+        name: metcat
+        schema:
+          enum:
+          - load
+          - battery
+          - production
+          - net
+          - calc
+          - other
+          type: string
+          minLength: 1
+        description: |-
+          Category of metrics (one of load, battery, production, net, calc, other
+
+          * `load` - load
+          * `battery` - battery
+          * `production` - production
+          * `net` - net
+          * `calc` - calc
+          * `other` - other
+      - in: query
+        name: mets
+        schema:
+          type: string
+          minLength: 1
+        description: Comma-delimited metric names (e.g. Net,Import)
+      - in: query
+        name: named
+        schema:
+          type: boolean
+          default: false
+        description: 'Convert site ref like ''bai'' to name ''Big Access Incoming''
+          (default: False). '
+      - in: query
+        name: sites
+        schema:
+          type: string
+          minLength: 1
+        description: Comma‐delimited site identifiers
+      - in: query
+        name: source
+        schema:
+          enum:
+          - iotawatt
+          - inverter
+          - nem
+          - calc
+          type: string
+          default: iotawatt
+          minLength: 1
+        description: |-
+          Data source to query (one of ['iotawatt', 'inverter', 'nem', 'calc']). Default is 'iotawatt'
+
+          * `iotawatt` - iotawatt
+          * `inverter` - inverter
+          * `nem` - nem
+          * `calc` - calc
+      - in: query
+        name: start
+        schema:
+          type: string
+          format: date-time
+        description: Start time (inclusive). ISO8601 or epoch.
+      - in: query
+        name: stop
+        schema:
+          type: string
+          format: date-time
+        description: Stop time (exclusive). ISO8601 or epoch.
+      - in: query
+        name: timeformat
+        schema:
+          enum:
+          - iso
+          - epoch
+          - epochms
+          type: string
+          minLength: 1
+        description: |-
+          Output format for timestamps (one of ['iso', 'epoch', 'epochms'])
+
+          * `iso` - ISO8601
+          * `epoch` - EPOCH
+          * `epochms` - EPOCH_MS
+      - in: query
+        name: timezone
+        schema:
+          type: string
+          minLength: 1
+        description: IANA timezone string (e.g. 'Australia/Brisbane'). Defaults to
+          first site TZ
+      - in: query
+        name: units
+        schema:
+          enum:
+          - W
+          type: string
+          minLength: 1
+        description: |-
+          [W] (default: W, only valid unit for heatmap queries)
+
+          * `W` - W
+      tags:
+      - ts
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Device refs mapped to heatmap data
+                additionalProperties:
+                  type: object
+                  description: Metric names mapped to time series data points
+                  additionalProperties:
+                    type: array
+                    items:
+                      type: array
+                      items:
+                      - type: string
+                        format: date
+                        description: Date (YYYY-MM-DD)
+                      - type: string
+                        format: time
+                        description: Time (HH:MM)
+                      - type: number
+                        format: float
+                        description: Value
+                      minItems: 3
+                      maxItems: 3
+            text/csv:
+              schema:
+                type: object
+                description: Device refs mapped to heatmap data
+                additionalProperties:
+                  type: object
+                  description: Metric names mapped to time series data points
+                  additionalProperties:
+                    type: array
+                    items:
+                      type: array
+                      items:
+                      - type: string
+                        format: date
+                        description: Date (YYYY-MM-DD)
+                      - type: string
+                        format: time
+                        description: Time (HH:MM)
+                      - type: number
+                        format: float
+                        description: Value
+                      minItems: 3
+                      maxItems: 3
+          description: ''
+  /api/v1/ts/metrics/:
+    get:
+      operationId: ts_metrics_retrieve
+      description: Return metadata about metrics
+      parameters:
+      - in: query
+        name: attribute
+        schema:
+          enum:
+          - power
+          - voltage
+          - current
+          - pf
+          - soc
+          - status
+          type: string
+          default: power
+          minLength: 1
+        description: |-
+          Attributes to return. Choices are ['power', 'voltage', 'current', 'pf', 'soc', 'status']. Default is 'power'.
+
+          * `power` - POWER
+          * `voltage` - VOLTAGE
+          * `current` - CURRENT
+          * `pf` - PF
+          * `soc` - SOC
+          * `status` - STATUS
+      - in: query
+        name: duration
+        schema:
+          type: string
+        description: 'Alternative to stop: a pandas compatible timedelta or plain
+          seconds'
+      - in: query
+        name: engine
+        schema:
+          enum:
+          - influx
+          - timescale
+          type: string
+          default: influx
+          minLength: 1
+        description: |-
+          Database engine to use for the query (one of ['influx', 'timescale'])
+
+          * `influx` - INFLUX
+          * `timescale` - TIMESCALE
+      - in: query
+        name: fleet
+        schema:
+          type: string
+          minLength: 1
+        description: fleet (e,g fleet1), equivalent to ?sites=site1,site2,site3
+      - in: query
+        name: format
+        schema:
+          type: string
+          enum:
+          - csv
+          - json
+      - in: query
+        name: metcat
+        schema:
+          enum:
+          - load
+          - battery
+          - production
+          - net
+          - calc
+          - other
+          type: string
+          minLength: 1
+        description: |-
+          Category of metrics (one of load, battery, production, net, calc, other
+
+          * `load` - load
+          * `battery` - battery
+          * `production` - production
+          * `net` - net
+          * `calc` - calc
+          * `other` - other
+      - in: query
+        name: mets
+        schema:
+          type: string
+          minLength: 1
+        description: Comma-delimited metric names (e.g. Net,Import)
+      - in: query
+        name: named
+        schema:
+          type: boolean
+          default: false
+        description: 'Convert site ref like ''bai'' to name ''Big Access Incoming''
+          (default: False). '
+      - in: query
+        name: sites
+        schema:
+          type: string
+          minLength: 1
+        description: Comma‐delimited site identifiers
+      - in: query
+        name: source
+        schema:
+          enum:
+          - iotawatt
+          - inverter
+          - nem
+          - calc
+          type: string
+          default: iotawatt
+          minLength: 1
+        description: |-
+          Data source to query (one of ['iotawatt', 'inverter', 'nem', 'calc']). Default is 'iotawatt'
+
+          * `iotawatt` - iotawatt
+          * `inverter` - inverter
+          * `nem` - nem
+          * `calc` - calc
+      - in: query
+        name: start
+        schema:
+          type: string
+          format: date-time
+        description: Start time (inclusive). ISO8601 or epoch.
+      - in: query
+        name: stop
+        schema:
+          type: string
+          format: date-time
+        description: Stop time (exclusive). ISO8601 or epoch.
+      - in: query
+        name: timeformat
+        schema:
+          enum:
+          - iso
+          - epoch
+          - epochms
+          type: string
+          minLength: 1
+        description: |-
+          Output format for timestamps (one of ['iso', 'epoch', 'epochms'])
+
+          * `iso` - ISO8601
+          * `epoch` - EPOCH
+          * `epochms` - EPOCH_MS
+      - in: query
+        name: timezone
+        schema:
+          type: string
+          minLength: 1
+        description: IANA timezone string (e.g. 'Australia/Brisbane'). Defaults to
+          first site TZ
+      - in: query
+        name: units
+        schema:
+          enum:
+          - kW
+          - W
+          - kWh/day
+          - $/day
+          type: string
+          minLength: 1
+        description: |-
+          Units of measurement for the attribute (one of {', '.join(Units.values())}). Default is 'W' for power.
+
+          * `kW` - kW
+          * `W` - W
+          * `kWh/day` - kWh/day
+          * `$/day` - $/day
+      tags:
+      - ts
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Device refs mapped to their metrics metadata
+                additionalProperties:
+                  type: object
+                  required:
+                  - metrics
+                  properties:
+                    metrics:
+                      type: object
+                      description: Metric names mapped to their metadata
+                      additionalProperties:
+                        type: object
+                        required:
+                        - description
+                        - category
+                        properties:
+                          description:
+                            type: string
+                          category:
+                            type: string
+              examples:
+                Example:
+                  value:
+                    device1:
+                      metrics:
+                        metric1:
+                          description: blah blah
+                          category: load
+                        metric2:
+                          description: blah blah
+                          category: load
+            text/csv:
+              schema:
+                type: object
+                description: Device refs mapped to their metrics metadata
+                additionalProperties:
+                  type: object
+                  required:
+                  - metrics
+                  properties:
+                    metrics:
+                      type: object
+                      description: Metric names mapped to their metadata
+                      additionalProperties:
+                        type: object
+                        required:
+                        - description
+                        - category
+                        properties:
+                          description:
+                            type: string
+                          category:
+                            type: string
+              examples:
+                Example:
+                  value:
+                    device1:
+                      metrics:
+                        metric1:
+                          description: blah blah
+                          category: load
+                        metric2:
+                          description: blah blah
+                          category: load
+          description: Metadata about metrics
+  /api/v1/ts/series/:
+    get:
+      operationId: ts_series_retrieve
+      parameters:
+      - in: query
+        name: attribute
+        schema:
+          enum:
+          - power
+          - voltage
+          - current
+          - pf
+          - soc
+          - status
+          type: string
+          default: power
+          minLength: 1
+        description: |-
+          Attributes to return. Choices are ['power', 'voltage', 'current', 'pf', 'soc', 'status']. Default is 'power'.
+
+          * `power` - POWER
+          * `voltage` - VOLTAGE
+          * `current` - CURRENT
+          * `pf` - PF
+          * `soc` - SOC
+          * `status` - STATUS
+      - in: query
+        name: bin
+        schema:
+          type: string
+          examples:
+          - 1h
+          - 30min
+          - 1d
+          - 1ME
+        description: Bin duration (e.g. '1h', '30min', '1ME', pd.DateOffset)
+        required: true
+      - in: query
+        name: duration
+        schema:
+          type: string
+        description: 'Alternative to stop: a pandas compatible timedelta or plain
+          seconds'
+      - in: query
+        name: engine
+        schema:
+          enum:
+          - influx
+          - timescale
+          type: string
+          default: influx
+          minLength: 1
+        description: |-
+          Database engine to use for the query (one of ['influx', 'timescale'])
+
+          * `influx` - INFLUX
+          * `timescale` - TIMESCALE
+      - in: query
+        name: fleet
+        schema:
+          type: string
+          minLength: 1
+        description: fleet (e,g fleet1), equivalent to ?sites=site1,site2,site3
+      - in: query
+        name: format
+        schema:
+          type: string
+          enum:
+          - csv
+          - json
+      - in: query
+        name: function
+        schema:
+          enum:
+          - mean
+          type: string
+          default: mean
+          minLength: 1
+        description: |-
+          [mean (default), sum, max]
+
+          * `mean` - mean
+      - in: query
+        name: metcat
+        schema:
+          enum:
+          - load
+          - battery
+          - production
+          - net
+          - calc
+          - other
+          type: string
+          minLength: 1
+        description: |-
+          Category of metrics (one of load, battery, production, net, calc, other
+
+          * `load` - load
+          * `battery` - battery
+          * `production` - production
+          * `net` - net
+          * `calc` - calc
+          * `other` - other
+      - in: query
+        name: mets
+        schema:
+          type: string
+          minLength: 1
+        description: Comma-delimited metric names (e.g. Net,Import)
+      - in: query
+        name: named
+        schema:
+          type: boolean
+          default: false
+        description: 'Convert site ref like ''bai'' to name ''Big Access Incoming''
+          (default: False). '
+      - in: query
+        name: sites
+        schema:
+          type: string
+          minLength: 1
+        description: Comma‐delimited site identifiers
+      - in: query
+        name: source
+        schema:
+          enum:
+          - iotawatt
+          - inverter
+          - nem
+          - calc
+          type: string
+          default: iotawatt
+          minLength: 1
+        description: |-
+          Data source to query (one of ['iotawatt', 'inverter', 'nem', 'calc']). Default is 'iotawatt'
+
+          * `iotawatt` - iotawatt
+          * `inverter` - inverter
+          * `nem` - nem
+          * `calc` - calc
+      - in: query
+        name: start
+        schema:
+          type: string
+          format: date-time
+        description: Start time (inclusive). ISO8601 or epoch.
+      - in: query
+        name: stop
+        schema:
+          type: string
+          format: date-time
+        description: Stop time (exclusive). ISO8601 or epoch.
+      - in: query
+        name: timeformat
+        schema:
+          enum:
+          - iso
+          - epoch
+          - epochms
+          type: string
+          minLength: 1
+        description: |-
+          Output format for timestamps (one of ['iso', 'epoch', 'epochms'])
+
+          * `iso` - ISO8601
+          * `epoch` - EPOCH
+          * `epochms` - EPOCH_MS
+      - in: query
+        name: timezone
+        schema:
+          type: string
+          minLength: 1
+        description: IANA timezone string (e.g. 'Australia/Brisbane'). Defaults to
+          first site TZ
+      - in: query
+        name: units
+        schema:
+          enum:
+          - kW
+          - W
+          - kWh/day
+          - $/day
+          type: string
+          minLength: 1
+        description: |-
+          Units of measurement for the attribute (one of {', '.join(Units.values())}). Default is 'W' for power.
+
+          * `kW` - kW
+          * `W` - W
+          * `kWh/day` - kWh/day
+          * `$/day` - $/day
+      tags:
+      - ts
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Device refs mapped to their metric data
+                additionalProperties:
+                  type: object
+                  description: Metric names mapped to time series arrays
+                  additionalProperties:
+                    type: array
+                    items:
+                      type: array
+                      items:
+                      - oneOf:
+                        - type: integer
+                          description: Unix timestamp (seconds)
+                        - type: integer
+                          description: Unix timestamp (milliseconds)
+                        - type: string
+                          format: date-time
+                          description: ISO 8601 timestamp
+                        description: 'Timestamp (format depends on timeformat parameter:
+                          ''epoch'', ''epochms'', or ''iso'')'
+                      - type: number
+                        description: Metric value
+                      minItems: 2
+                      maxItems: 2
+              examples:
+                Example:
+                  value:
+                    device1:
+                      Net:
+                      - - 1672531199
+                        - 0.5
+                      - - 1672531200
+                        - 0.6
+            text/csv:
+              schema:
+                type: object
+                description: Device refs mapped to their metric data
+                additionalProperties:
+                  type: object
+                  description: Metric names mapped to time series arrays
+                  additionalProperties:
+                    type: array
+                    items:
+                      type: array
+                      items:
+                      - oneOf:
+                        - type: integer
+                          description: Unix timestamp (seconds)
+                        - type: integer
+                          description: Unix timestamp (milliseconds)
+                        - type: string
+                          format: date-time
+                          description: ISO 8601 timestamp
+                        description: 'Timestamp (format depends on timeformat parameter:
+                          ''epoch'', ''epochms'', or ''iso'')'
+                      - type: number
+                        description: Metric value
+                      minItems: 2
+                      maxItems: 2
+              examples:
+                Example:
+                  value:
+                    device1:
+                      Net:
+                      - - 1672531199
+                        - 0.5
+                      - - 1672531200
+                        - 0.6
+          description: Time series data as JSON
+  /api/v1/ts/table/:
+    get:
+      operationId: ts_table_retrieve
+      description: Return data as table (i.e. without timestamps)
+      parameters:
+      - in: query
+        name: attribute
+        schema:
+          enum:
+          - power
+          - voltage
+          - current
+          - pf
+          - soc
+          - status
+          type: string
+          default: power
+          minLength: 1
+        description: |-
+          Attributes to return. Choices are ['power', 'voltage', 'current', 'pf', 'soc', 'status']. Default is 'power'.
+
+          * `power` - POWER
+          * `voltage` - VOLTAGE
+          * `current` - CURRENT
+          * `pf` - PF
+          * `soc` - SOC
+          * `status` - STATUS
+      - in: query
+        name: duration
+        schema:
+          type: string
+        description: 'Alternative to stop: a pandas compatible timedelta or plain
+          seconds'
+      - in: query
+        name: engine
+        schema:
+          enum:
+          - influx
+          - timescale
+          type: string
+          default: influx
+          minLength: 1
+        description: |-
+          Database engine to use for the query (one of ['influx', 'timescale'])
+
+          * `influx` - INFLUX
+          * `timescale` - TIMESCALE
+      - in: query
+        name: fleet
+        schema:
+          type: string
+          minLength: 1
+        description: fleet (e,g fleet1), equivalent to ?sites=site1,site2,site3
+      - in: query
+        name: format
+        schema:
+          type: string
+          enum:
+          - csv
+          - json
+      - in: query
+        name: function
+        schema:
+          enum:
+          - mean
+          type: string
+          default: mean
+          minLength: 1
+        description: |-
+          [mean (default), sum, max]
+
+          * `mean` - mean
+      - in: query
+        name: metcat
+        schema:
+          enum:
+          - load
+          - battery
+          - production
+          - net
+          - calc
+          - other
+          type: string
+          minLength: 1
+        description: |-
+          Category of metrics (one of load, battery, production, net, calc, other
+
+          * `load` - load
+          * `battery` - battery
+          * `production` - production
+          * `net` - net
+          * `calc` - calc
+          * `other` - other
+      - in: query
+        name: mets
+        schema:
+          type: string
+          minLength: 1
+        description: Comma-delimited metric names (e.g. Net,Import)
+      - in: query
+        name: named
+        schema:
+          type: boolean
+          default: false
+        description: 'Convert site ref like ''bai'' to name ''Big Access Incoming''
+          (default: False). '
+      - in: query
+        name: sites
+        schema:
+          type: string
+          minLength: 1
+        description: Comma‐delimited site identifiers
+      - in: query
+        name: source
+        schema:
+          enum:
+          - iotawatt
+          - inverter
+          - nem
+          - calc
+          type: string
+          default: iotawatt
+          minLength: 1
+        description: |-
+          Data source to query (one of ['iotawatt', 'inverter', 'nem', 'calc']). Default is 'iotawatt'
+
+          * `iotawatt` - iotawatt
+          * `inverter` - inverter
+          * `nem` - nem
+          * `calc` - calc
+      - in: query
+        name: start
+        schema:
+          type: string
+          format: date-time
+        description: Start time (inclusive). ISO8601 or epoch.
+      - in: query
+        name: stop
+        schema:
+          type: string
+          format: date-time
+        description: Stop time (exclusive). ISO8601 or epoch.
+      - in: query
+        name: timeformat
+        schema:
+          enum:
+          - iso
+          - epoch
+          - epochms
+          type: string
+          minLength: 1
+        description: |-
+          Output format for timestamps (one of ['iso', 'epoch', 'epochms'])
+
+          * `iso` - ISO8601
+          * `epoch` - EPOCH
+          * `epochms` - EPOCH_MS
+      - in: query
+        name: timezone
+        schema:
+          type: string
+          minLength: 1
+        description: IANA timezone string (e.g. 'Australia/Brisbane'). Defaults to
+          first site TZ
+      - in: query
+        name: units
+        schema:
+          enum:
+          - kW
+          - W
+          - kWh/day
+          - $/day
+          type: string
+          minLength: 1
+        description: |-
+          Units of measurement for the attribute (one of {', '.join(Units.values())}). Default is 'W' for power.
+
+          * `kW` - kW
+          * `W` - W
+          * `kWh/day` - kWh/day
+          * `$/day` - $/day
+      tags:
+      - ts
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Device refs mapped to their metric data
+                additionalProperties:
+                  type: array
+                  items:
+                    type: array
+                    items:
+                    - type: string
+                      description: Metric name
+                    - type: number
+                      description: Metric value
+                    minItems: 2
+                    maxItems: 2
+              examples:
+                Example:
+                  value:
+                    hfs01:
+                    - - Net
+                      - 123.45
+                    - - Import
+                      - 678.9
+            text/csv:
+              schema:
+                type: object
+                description: Device refs mapped to their metric data
+                additionalProperties:
+                  type: array
+                  items:
+                    type: array
+                    items:
+                    - type: string
+                      description: Metric name
+                    - type: number
+                      description: Metric value
+                    minItems: 2
+                    maxItems: 2
+              examples:
+                Example:
+                  value:
+                    hfs01:
+                    - - Net
+                      - 123.45
+                    - - Import
+                      - 678.9
+          description: Table data as JSON
+  /api/v1/user/:
+    get:
+      operationId: user_retrieve
+      description: |-
+        Reads and updates UserModel fields
+        Accepts GET, PUT, PATCH methods.
+
+        Default accepted fields: username, first_name, last_name
+        Default display fields: pk, username, email, first_name, last_name
+        Read-only fields: pk, email
+
+        Returns UserModel fields.
+      tags:
+      - user
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserDetails'
+          description: ''
+    put:
+      operationId: user_update
+      description: |-
+        Reads and updates UserModel fields
+        Accepts GET, PUT, PATCH methods.
+
+        Default accepted fields: username, first_name, last_name
+        Default display fields: pk, username, email, first_name, last_name
+        Read-only fields: pk, email
+
+        Returns UserModel fields.
+      tags:
+      - user
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserDetails'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/UserDetails'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/UserDetails'
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserDetails'
+          description: ''
+    patch:
+      operationId: user_partial_update
+      description: |-
+        Reads and updates UserModel fields
+        Accepts GET, PUT, PATCH methods.
+
+        Default accepted fields: username, first_name, last_name
+        Default display fields: pk, username, email, first_name, last_name
+        Read-only fields: pk, email
+
+        Returns UserModel fields.
+      tags:
+      - user
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedUserDetails'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedUserDetails'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedUserDetails'
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserDetails'
+          description: ''
+  /api/v1/users/:
+    get:
+      operationId: users_list
+      tags:
+      - users
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/User'
+          description: ''
+    post:
+      operationId: users_create
+      tags:
+      - users
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/User'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/User'
+        required: true
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+          description: ''
+  /api/v1/users/{id}/:
+    get:
+      operationId: users_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this PhiUser.
+        required: true
+      tags:
+      - users
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+          description: ''
+    put:
+      operationId: users_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this PhiUser.
+        required: true
+      tags:
+      - users
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/User'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/User'
+        required: true
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+          description: ''
+    patch:
+      operationId: users_partial_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this PhiUser.
+        required: true
+      tags:
+      - users
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedUser'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedUser'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedUser'
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+          description: ''
+    delete:
+      operationId: users_destroy
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this PhiUser.
+        required: true
+      tags:
+      - users
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/v1/users/{id}/claim/{ref}/:
+    patch:
+      operationId: users_claim_partial_update
+      description: |-
+        /user/1/device/hfs01a/
+        PATCH data { claim_token: "xxxx" }
+        Device(hfs01a).claim_token must match
+        Return 200 with user with additional device
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this PhiUser.
+        required: true
+      - in: path
+        name: ref
+        schema:
+          type: string
+        description: Device reference (string)
+        required: true
+      tags:
+      - users
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedUser'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedUser'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedUser'
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+          description: ''
+  /api/v1/users/current/:
+    get:
+      operationId: users_current_retrieve
+      tags:
+      - users
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+          description: ''
+components:
+  schemas:
+    AuthToken:
+      type: object
+      properties:
+        username:
+          type: string
+          writeOnly: true
+        password:
+          type: string
+          writeOnly: true
+        token:
+          type: string
+          readOnly: true
+      required:
+      - password
+      - token
+      - username
+    Device:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        ref:
+          type: string
+          maxLength: 50
+        name:
+          type: string
+          maxLength: 200
+        title:
+          type: string
+        name_ref:
+          type: string
+          readOnly: true
+        latitude:
+          type: number
+          format: double
+        longitude:
+          type: number
+          format: double
+        owner_full_name:
+          type: string
+          readOnly: true
+          default: ''
+        site_status:
+          type: string
+        solar:
+          type: string
+          readOnly: true
+          default: Unknown
+        latest:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        latest_ago:
+          type: integer
+          description: |-
+            Return seconds since last data
+            -666 if no latest data (to distinguish from 0 and allow nice formatting in grafana)
+          readOnly: true
+          nullable: true
+        images:
+          type: array
+          items:
+            type: string
+          readOnly: true
+          description: List of image URLs for this device
+        rates:
+          $ref: '#/components/schemas/Rates'
+        metrics:
+          type: array
+          items:
+            $ref: '#/components/schemas/MetricLabel'
+          readOnly: true
+          default: []
+        videos:
+          type: array
+          items:
+            $ref: '#/components/schemas/DeviceVideo'
+          readOnly: true
+        users:
+          type: array
+          items:
+            type: integer
+          description: Each device may have many users
+        timezone:
+          type: string
+          readOnly: true
+        goodwe_site_id:
+          type: string
+        battery:
+          type: boolean
+      required:
+      - id
+      - images
+      - latest
+      - latest_ago
+      - metrics
+      - name
+      - name_ref
+      - owner_full_name
+      - ref
+      - solar
+      - timezone
+      - videos
+    DeviceShortDetails:
+      type: object
+      description: Inline serializer for device details in fleet response
+      properties:
+        name:
+          type: string
+        id:
+          type: integer
+        last_data:
+          type: string
+          format: date-time
+          nullable: true
+      required:
+      - id
+      - last_data
+      - name
+    DeviceVideo:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+          maxLength: 64
+        url:
+          type: string
+          format: uri
+          maxLength: 200
+        thumbnail:
+          type: string
+          format: uri
+          maxLength: 200
+        description:
+          type: string
+          maxLength: 128
+        created:
+          type: string
+          format: date-time
+          readOnly: true
+        device:
+          type: integer
+          nullable: true
+        fleet:
+          type: integer
+          nullable: true
+      required:
+      - created
+      - id
+      - name
+      - url
+    Fleet:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        ref:
+          type: string
+          maxLength: 50
+        name:
+          type: string
+          maxLength: 64
+        devices:
+          type: array
+          items:
+            type: string
+            format: uri
+          readOnly: true
+        timezone:
+          type: string
+          readOnly: true
+        devices_refs:
+          type: array
+          items:
+            type: string
+          readOnly: true
+          description: List of device refs in this fleet
+        devices_details:
+          type: object
+          additionalProperties:
+            $ref: '#/components/schemas/DeviceShortDetails'
+          readOnly: true
+          description: Detailed device information including name, id, and last data
+            timestamp
+      required:
+      - devices
+      - devices_details
+      - devices_refs
+      - id
+      - name
+      - ref
+      - timezone
+    Login:
+      type: object
+      properties:
+        username:
+          type: string
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+      required:
+      - password
+    MetricLabel:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+          maxLength: 64
+        comment:
+          type: string
+          maxLength: 300
+        device:
+          type: integer
+      required:
+      - device
+      - id
+    PasswordChange:
+      type: object
+      properties:
+        new_password1:
+          type: string
+          maxLength: 128
+        new_password2:
+          type: string
+          maxLength: 128
+      required:
+      - new_password1
+      - new_password2
+    PasswordReset:
+      type: object
+      description: Serializer for requesting a password reset e-mail.
+      properties:
+        email:
+          type: string
+          format: email
+      required:
+      - email
+    PasswordResetConfirm:
+      type: object
+      description: Serializer for confirming a password reset attempt.
+      properties:
+        new_password1:
+          type: string
+          maxLength: 128
+        new_password2:
+          type: string
+          maxLength: 128
+        uid:
+          type: string
+        token:
+          type: string
+      required:
+      - new_password1
+      - new_password2
+      - token
+      - uid
+    PatchedDevice:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        ref:
+          type: string
+          maxLength: 50
+        name:
+          type: string
+          maxLength: 200
+        title:
+          type: string
+        name_ref:
+          type: string
+          readOnly: true
+        latitude:
+          type: number
+          format: double
+        longitude:
+          type: number
+          format: double
+        owner_full_name:
+          type: string
+          readOnly: true
+          default: ''
+        site_status:
+          type: string
+        solar:
+          type: string
+          readOnly: true
+          default: Unknown
+        latest:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        latest_ago:
+          type: integer
+          description: |-
+            Return seconds since last data
+            -666 if no latest data (to distinguish from 0 and allow nice formatting in grafana)
+          readOnly: true
+          nullable: true
+        images:
+          type: array
+          items:
+            type: string
+          readOnly: true
+          description: List of image URLs for this device
+        rates:
+          $ref: '#/components/schemas/Rates'
+        metrics:
+          type: array
+          items:
+            $ref: '#/components/schemas/MetricLabel'
+          readOnly: true
+          default: []
+        videos:
+          type: array
+          items:
+            $ref: '#/components/schemas/DeviceVideo'
+          readOnly: true
+        users:
+          type: array
+          items:
+            type: integer
+          description: Each device may have many users
+        timezone:
+          type: string
+          readOnly: true
+        goodwe_site_id:
+          type: string
+        battery:
+          type: boolean
+    PatchedFleet:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        ref:
+          type: string
+          maxLength: 50
+        name:
+          type: string
+          maxLength: 64
+        devices:
+          type: array
+          items:
+            type: string
+            format: uri
+          readOnly: true
+        timezone:
+          type: string
+          readOnly: true
+        devices_refs:
+          type: array
+          items:
+            type: string
+          readOnly: true
+          description: List of device refs in this fleet
+        devices_details:
+          type: object
+          additionalProperties:
+            $ref: '#/components/schemas/DeviceShortDetails'
+          readOnly: true
+          description: Detailed device information including name, id, and last data
+            timestamp
+    PatchedUser:
+      type: object
+      properties:
+        devices:
+          type: array
+          items:
+            type: string
+          readOnly: true
+          description: List of device refs for this user
+        id:
+          type: integer
+          readOnly: true
+        email:
+          type: string
+          format: email
+          maxLength: 254
+        full_name:
+          type: string
+          maxLength: 191
+        short_name:
+          type: string
+          maxLength: 191
+        phone:
+          type: string
+          nullable: true
+          maxLength: 128
+        password:
+          type: string
+          writeOnly: true
+          maxLength: 128
+    PatchedUserDetails:
+      type: object
+      description: User model w/o password
+      properties:
+        pk:
+          type: integer
+          readOnly: true
+          title: ID
+        email:
+          type: string
+          format: email
+          readOnly: true
+    Rates:
+      type: object
+      properties:
+        id:
+          type: integer
+        import_rate:
+          type: number
+          format: double
+          maximum: 100000000
+          minimum: -100000000
+          exclusiveMaximum: true
+          exclusiveMinimum: true
+        export_rate:
+          type: number
+          format: double
+          maximum: 100000000
+          minimum: -100000000
+          exclusiveMaximum: true
+          exclusiveMinimum: true
+        service_rate:
+          type: number
+          format: double
+          maximum: 100000000
+          minimum: -100000000
+          exclusiveMaximum: true
+          exclusiveMinimum: true
+        billing_days:
+          type: integer
+      required:
+      - billing_days
+      - export_rate
+      - id
+      - import_rate
+      - service_rate
+    RestAuthDetail:
+      type: object
+      properties:
+        detail:
+          type: string
+          readOnly: true
+      required:
+      - detail
+    Token:
+      type: object
+      description: Serializer for Token model.
+      properties:
+        key:
+          type: string
+          maxLength: 40
+      required:
+      - key
+    User:
+      type: object
+      properties:
+        devices:
+          type: array
+          items:
+            type: string
+          readOnly: true
+          description: List of device refs for this user
+        id:
+          type: integer
+          readOnly: true
+        email:
+          type: string
+          format: email
+          maxLength: 254
+        full_name:
+          type: string
+          maxLength: 191
+        short_name:
+          type: string
+          maxLength: 191
+        phone:
+          type: string
+          nullable: true
+          maxLength: 128
+        password:
+          type: string
+          writeOnly: true
+          maxLength: 128
+      required:
+      - devices
+      - email
+      - id
+    UserDetails:
+      type: object
+      description: User model w/o password
+      properties:
+        pk:
+          type: integer
+          readOnly: true
+          title: ID
+        email:
+          type: string
+          format: email
+          readOnly: true
+      required:
+      - email
+      - pk
+  securitySchemes:
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: sessionid
+    tokenAuth:
+      type: apiKey
+      in: header
+      name: Authorization
+      description: Token-based authentication with required prefix "Token"
