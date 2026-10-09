@@ -20,64 +20,80 @@ http --version
 Set your credentials as environment variables:
 
 ```bash
-export PHISAVER_URL="https://app.phisaver.com"
-export PHISAVER_USERNAME="demo@phisaver.com"
-export PHISAVER_PASSWORD="checkthewebsiteoremailsupport"
+export PS_API_URL="https://app.phisaver.com"
+export PS_API_USERNAME="demo@phisaver.com"
+export PS_API_PASSWORD="checkthewebsiteoremailsupport"
 ```
 
 ## 01. Authentication
 
-Authenticate and get an API token:
+Exchange your username and password for an API token (`-f` sends a form, as the token endpoint expects):
 
 ```bash
-http POST $PHISAVER_URL/api/v1/login/ \
-  email="$PHISAVER_USERNAME" \
-  password="$PHISAVER_PASSWORD"
+http -f POST $PS_API_URL/api/v2/token/ \
+  username="$PS_API_USERNAME" \
+  password="$PS_API_PASSWORD"
 ```
 
 **Expected response:**
 ```json
 {
-    "key": "abc123def456..."
+    "token": "abc123def456..."
 }
 ```
 
 **Save the token:**
 ```bash
-export TOKEN=$(http POST $PHISAVER_URL/api/v1/login/ \
-  email="$PHISAVER_USERNAME" \
-  password="$PHISAVER_PASSWORD" \
-  | python3 -c "import sys, json; print(json.load(sys.stdin)['key'])")
+export TOKEN=$(http -f POST $PS_API_URL/api/v2/token/ \
+  username="$PS_API_USERNAME" \
+  password="$PS_API_PASSWORD" \
+  | python3 -c "import sys, json; print(json.load(sys.stdin)['token'])")
 
 echo "Token: $TOKEN"
 ```
 
+Send it on every request as `"Authorization:Token $TOKEN"`.
+
 **Alternative: HTTPie Sessions (cookie-based):**
 
-HTTPie sessions use cookies instead of tokens:
+`/api/v2/login/` also starts a session, which HTTPie can store as cookies:
 
 ```bash
 # Login with session - saves cookies automatically
-http --session=phisaver POST $PHISAVER_URL/api/v1/login/ \
-  email="$PHISAVER_USERNAME" \
-  password="$PHISAVER_PASSWORD"
+http --session=phisaver POST $PS_API_URL/api/v2/login/ \
+  email="$PS_API_USERNAME" \
+  password="$PS_API_PASSWORD"
 
-# Subsequent requests use saved cookies
-http --session=phisaver GET $PHISAVER_URL/api/v1/devices/
+# Subsequent GET requests use saved cookies
+http --session=phisaver GET $PS_API_URL/api/v2/sites/
 ```
 
-## 02. List Devices
+Logging in again with an existing session returns `403 CSRF Failed`, because the saved cookie already authenticates you. Start a fresh session instead, e.g. `--session=phisaver2`, or delete the saved session under `~/.config/httpie/sessions/`.
 
-Get all devices:
+## 02. Sites
+
+List all sites your account can access:
 
 ```bash
-http GET $PHISAVER_URL/api/v1/devices/ \
+http GET $PS_API_URL/api/v2/sites/ \
   "Authorization:Token $TOKEN"
 ```
 
-**Get a specific device:**
+Each site has an `id` (e.g. `demo1`) - use it in `sites==` for time-series queries.
+
+**Filter sites** (comma-separated values are accepted):
 ```bash
-http GET $PHISAVER_URL/api/v1/devices/demo1/ \
+http GET $PS_API_URL/api/v2/sites/ \
+  "Authorization:Token $TOKEN" \
+  name_prefix==Fac \
+  data_status==Active,RecentlyInactive
+```
+
+Status values: `data_status` is one of `Active`, `RecentlyInactive`, `Inactive`, `NotStarted`, `Unknown`; `solar_status` is one of `Active`, `SubOptimal`, `Inactive`, `NotPresent`, `Unknown`.
+
+**Get a specific site** (rates, location, metrics, switchboards, images):
+```bash
+http GET $PS_API_URL/api/v2/sites/demo1/ \
   "Authorization:Token $TOKEN"
 ```
 
@@ -90,10 +106,12 @@ This section demonstrates:
 - Querying metrics by category
 - Handling error responses
 
+Replace `demo1`/`demo2` with site ids from your account, and pick dates where the site has data (see `last_data_at`).
+
 ### Example 1: Time-Series Data (Daily Bins)
 
 ```bash
-http GET $PHISAVER_URL/api/v1/ts/series/ \
+http GET $PS_API_URL/api/v2/ts/series/ \
   "Authorization:Token $TOKEN" \
   sites==demo1 \
   start=="2025-01-01T00:00:00+10:00" \
@@ -105,10 +123,10 @@ http GET $PHISAVER_URL/api/v1/ts/series/ \
 
 ### Example 2: Table Format (Multiple Sites)
 
-Get aggregated data for multiple devices:
+Get one aggregated value per metric for multiple sites:
 
 ```bash
-http GET $PHISAVER_URL/api/v1/ts/table/ \
+http GET $PS_API_URL/api/v2/ts/table/ \
   "Authorization:Token $TOKEN" \
   sites==demo1,demo2 \
   start=="2025-01-01T00:00:00+10:00" \
@@ -121,7 +139,7 @@ http GET $PHISAVER_URL/api/v1/ts/table/ \
 Query all metrics in a category (e.g., all load circuits):
 
 ```bash
-http GET $PHISAVER_URL/api/v1/ts/series/ \
+http GET $PS_API_URL/api/v2/ts/series/ \
   "Authorization:Token $TOKEN" \
   sites==demo1 \
   start=="2025-01-01T00:00:00+10:00" \
@@ -136,7 +154,7 @@ http GET $PHISAVER_URL/api/v1/ts/series/ \
 Attempt an invalid query to see error response:
 
 ```bash
-http GET $PHISAVER_URL/api/v1/ts/series/ \
+http GET $PS_API_URL/api/v2/ts/series/ \
   "Authorization:Token $TOKEN" \
   sites==demo1 \
   start=="2025-01-01T00:00:00+10:00" \
@@ -146,49 +164,111 @@ http GET $PHISAVER_URL/api/v1/ts/series/ \
   units==W
 ```
 
-This will return an error response showing which parameters are invalid.
+This will return a 400 response showing which parameters are invalid.
+
+## 04. Heatmap
+
+`[day_of_year, hour, watts]` points (hourly averages), for time-of-day vs day plots. One site per request; units are always `W`:
+
+```bash
+http GET $PS_API_URL/api/v2/ts/heatmap/ \
+  "Authorization:Token $TOKEN" \
+  sites==demo1 \
+  start=="2025-01-01T00:00:00+10:00" \
+  stop=="2025-01-03T00:00:00+10:00" \
+  mets==Net
+```
+
+## 05. Fleets
+
+A fleet is a named group of sites.
+
+```bash
+# List fleets
+http GET $PS_API_URL/api/v2/fleets/ "Authorization:Token $TOKEN"
+
+# Fleet details, including its sites
+http GET $PS_API_URL/api/v2/fleets/myfleet/ "Authorization:Token $TOKEN"
+
+# Use fleet== in place of sites== in any time-series query
+http GET $PS_API_URL/api/v2/ts/table/ \
+  "Authorization:Token $TOKEN" \
+  fleet==myfleet \
+  duration==7d \
+  units==kWh/day
+```
+
+## 06. Site Hardware: Metrics, Switchboards, Poles, IoTaWatts
+
+```bash
+# Metrics (circuits) at a site, with category - use these names in mets==
+http GET $PS_API_URL/api/v2/sites/demo1/metrics/ "Authorization:Token $TOKEN"
+
+# Switchboards at a site (each lists its IoTaWatts), then one switchboard's poles (circuit breakers)
+http GET $PS_API_URL/api/v2/sites/demo1/switchboards/ "Authorization:Token $TOKEN"
+http GET $PS_API_URL/api/v2/sites/demo1/switchboards/<switchboard_id>/poles/ "Authorization:Token $TOKEN"
+
+# IoTaWatt energy monitors at a site
+http GET $PS_API_URL/api/v2/sites/demo1/iotawatts/ "Authorization:Token $TOKEN"
+
+# All IoTaWatts you can access (site== narrows to some sites), and one in detail (CTs, VT, phases)
+http GET $PS_API_URL/api/v2/iotawatts/ "Authorization:Token $TOKEN"
+http GET $PS_API_URL/api/v2/iotawatts/ "Authorization:Token $TOKEN" site==demo1,demo2
+http GET $PS_API_URL/api/v2/iotawatts/<iotawatt_id>/ "Authorization:Token $TOKEN"
+```
+
+`/sites/demo1/metrics/` lists the site's measured circuits. Calculated metrics (`Consumption`, `Import`, `Export`, ...) are not listed, but you can still query them in `mets==`.
+
+**Select items by id.** Every list accepts `id==` with one id or comma-separated ids:
+
+```bash
+http GET $PS_API_URL/api/v2/sites/demo1/metrics/ "Authorization:Token $TOKEN" id==Net,Production
+http GET $PS_API_URL/api/v2/fleets/ "Authorization:Token $TOKEN" id==myfleet
+```
 
 ## Tips
 
 **Save response to file:**
 ```bash
-http GET $PHISAVER_URL/api/v1/devices/ \
-  "Authorization:Token $TOKEN" > devices.json
+http GET $PS_API_URL/api/v2/sites/ \
+  "Authorization:Token $TOKEN" > sites.json
 ```
 
-**Download as CSV:**
+**Epoch timestamps** (easier for plotting/spreadsheets):
 ```bash
-http GET $PHISAVER_URL/api/v1/ts/series/ \
+http GET $PS_API_URL/api/v2/ts/series/ \
   "Authorization:Token $TOKEN" \
   sites==demo1 \
-  start=="2025-01-01T00:00:00+10:00" \
-  stop=="2025-01-07T00:00:00+10:00" \
+  duration==7d \
   bin==1d \
   mets==Production \
   units==kWh/day \
-  format==csv > data.csv
+  timeformat==epoch
 ```
 
 **Verbose output (see request headers):**
 ```bash
-http -v GET $PHISAVER_URL/api/v1/devices/ \
+http -v GET $PS_API_URL/api/v2/sites/ \
   "Authorization:Token $TOKEN"
 ```
 
 ## Query Parameters
 
-Common parameters for `/ts/series/` endpoint:
+Common parameters for `/ts/series/`, `/ts/table/` and `/ts/heatmap/`:
 
-- `sites` - Comma-separated site identifiers (e.g., `demo1,demo2`)
-- `start` - Start time (ISO8601 format with timezone)
-- `stop` - Stop time (ISO8601 format with timezone)
-- `bin` - Bin duration (`1h`, `30min`, `1d`, `1M`)
-- `mets` - Comma-separated metric names (`Production`, `Consumption`, `Export`)
-- `units` - Units of measurement (`W`, `kW`, `kWh`, `kWh/day`, `$/day`)
-- `format` - Response format (`json`, `csv`)
+- `sites` - Comma-separated site ids (e.g., `demo1,demo2`), or `fleet` - a fleet id
+- `start` - Start time (ISO8601 with timezone, or epoch seconds)
+- `stop` - Stop time (default now)
+- `duration` - Instead of `start`: length ending at `stop` (e.g. `7d`, `24h`)
+- `bin` - Bin duration (`1h`, `30min`, `1d`, `1ME`) - `/ts/series/` only, required
+- `mets` - Comma-separated metric names (`Production`, `Consumption`, `Net`), or `metcat` - a category
+- `units` - Units (`W`, `kW`, `kWh/day`, `$/day`; heatmap is `W` only)
+- `timeformat` - Output timestamps (`iso`, `epoch`, `epochms`)
 - `timezone` - IANA timezone string (e.g., `Australia/Brisbane`)
+
+See the [Cheat Sheet](../../CHEATSHEET.md) for all parameters.
 
 ## More Info
 
 - [HTTPie Documentation](https://httpie.io/docs)
-- [PhiSaver API Documentation](https://phisaver.com/docs)
+- [OpenAPI Schema](../../schema.yml)

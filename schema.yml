@@ -1,161 +1,19 @@
 openapi: 3.0.3
 info:
   title: Phisaver API
-  version: 1.0.0
+  version: 2.0.0 (v2)
   description: API for the PhiSaver Energy Monitor
 paths:
-  /api/v1/devices/:
-    get:
-      operationId: devices_list
-      tags:
-      - devices
-      security:
-      - tokenAuth: []
-      - cookieAuth: []
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Device'
-          description: ''
-    post:
-      operationId: devices_create
-      tags:
-      - devices
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/Device'
-          application/x-www-form-urlencoded:
-            schema:
-              $ref: '#/components/schemas/Device'
-          multipart/form-data:
-            schema:
-              $ref: '#/components/schemas/Device'
-        required: true
-      security:
-      - tokenAuth: []
-      - cookieAuth: []
-      responses:
-        '201':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Device'
-          description: ''
-  /api/v1/devices/{ref}/:
-    get:
-      operationId: devices_retrieve
-      parameters:
-      - in: path
-        name: ref
-        schema:
-          type: string
-        required: true
-      tags:
-      - devices
-      security:
-      - tokenAuth: []
-      - cookieAuth: []
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Device'
-          description: ''
-    put:
-      operationId: devices_update
-      parameters:
-      - in: path
-        name: ref
-        schema:
-          type: string
-        required: true
-      tags:
-      - devices
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/Device'
-          application/x-www-form-urlencoded:
-            schema:
-              $ref: '#/components/schemas/Device'
-          multipart/form-data:
-            schema:
-              $ref: '#/components/schemas/Device'
-        required: true
-      security:
-      - tokenAuth: []
-      - cookieAuth: []
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Device'
-          description: ''
-    patch:
-      operationId: devices_partial_update
-      parameters:
-      - in: path
-        name: ref
-        schema:
-          type: string
-        required: true
-      tags:
-      - devices
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/PatchedDevice'
-          application/x-www-form-urlencoded:
-            schema:
-              $ref: '#/components/schemas/PatchedDevice'
-          multipart/form-data:
-            schema:
-              $ref: '#/components/schemas/PatchedDevice'
-      security:
-      - tokenAuth: []
-      - cookieAuth: []
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Device'
-          description: ''
-    delete:
-      operationId: devices_destroy
-      parameters:
-      - in: path
-        name: ref
-        schema:
-          type: string
-        required: true
-      tags:
-      - devices
-      security:
-      - tokenAuth: []
-      - cookieAuth: []
-      responses:
-        '204':
-          description: No response body
-  /api/v1/fleets/:
+  /api/v2/fleets/:
     get:
       operationId: fleets_list
-      description: |-
-        Enforces object-level permissions in ``rest_framework.viewsets.ViewSet``,
-        deriving the permission type from the particular action to be performed..
-
-        As with ``rules.contrib.views.AutoPermissionRequiredMixin``, this only works when
-        model permissions are registered using ``rules.contrib.models.RulesModelMixin``.
+      parameters:
+      - name: id
+        required: false
+        in: query
+        description: Exact ID or comma-separated IDs.
+        schema:
+          type: string
       tags:
       - fleets
       security:
@@ -168,52 +26,14 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/Fleet'
+                  $ref: '#/components/schemas/FleetSummary'
           description: ''
-    post:
-      operationId: fleets_create
-      description: |-
-        Enforces object-level permissions in ``rest_framework.viewsets.ViewSet``,
-        deriving the permission type from the particular action to be performed..
-
-        As with ``rules.contrib.views.AutoPermissionRequiredMixin``, this only works when
-        model permissions are registered using ``rules.contrib.models.RulesModelMixin``.
-      tags:
-      - fleets
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/Fleet'
-          application/x-www-form-urlencoded:
-            schema:
-              $ref: '#/components/schemas/Fleet'
-          multipart/form-data:
-            schema:
-              $ref: '#/components/schemas/Fleet'
-        required: true
-      security:
-      - tokenAuth: []
-      - cookieAuth: []
-      responses:
-        '201':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Fleet'
-          description: ''
-  /api/v1/fleets/{ref}/:
+  /api/v2/fleets/{id}/:
     get:
       operationId: fleets_retrieve
-      description: |-
-        Enforces object-level permissions in ``rest_framework.viewsets.ViewSet``,
-        deriving the permission type from the particular action to be performed..
-
-        As with ``rules.contrib.views.AutoPermissionRequiredMixin``, this only works when
-        model permissions are registered using ``rules.contrib.models.RulesModelMixin``.
       parameters:
       - in: path
-        name: ref
+        name: id
         schema:
           type: string
         required: true
@@ -227,36 +47,26 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Fleet'
+                $ref: '#/components/schemas/FleetDetail'
           description: ''
-    put:
-      operationId: fleets_update
-      description: |-
-        Enforces object-level permissions in ``rest_framework.viewsets.ViewSet``,
-        deriving the permission type from the particular action to be performed..
-
-        As with ``rules.contrib.views.AutoPermissionRequiredMixin``, this only works when
-        model permissions are registered using ``rules.contrib.models.RulesModelMixin``.
+  /api/v2/iotawatts/:
+    get:
+      operationId: iotawatts_list
+      description: List and retrieve IoTaWatts by their globally unique ID.
       parameters:
-      - in: path
-        name: ref
+      - name: id
+        required: false
+        in: query
+        description: Exact ID or comma-separated IDs.
         schema:
           type: string
-        required: true
+      - in: query
+        name: site
+        schema:
+          type: string
+        description: Exact Site ID or comma-separated Site IDs.
       tags:
-      - fleets
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/Fleet'
-          application/x-www-form-urlencoded:
-            schema:
-              $ref: '#/components/schemas/Fleet'
-          multipart/form-data:
-            schema:
-              $ref: '#/components/schemas/Fleet'
-        required: true
+      - iotawatts
       security:
       - tokenAuth: []
       - cookieAuth: []
@@ -265,35 +75,24 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Fleet'
+                type: array
+                items:
+                  $ref: '#/components/schemas/IotaWattSummary'
           description: ''
-    patch:
-      operationId: fleets_partial_update
-      description: |-
-        Enforces object-level permissions in ``rest_framework.viewsets.ViewSet``,
-        deriving the permission type from the particular action to be performed..
-
-        As with ``rules.contrib.views.AutoPermissionRequiredMixin``, this only works when
-        model permissions are registered using ``rules.contrib.models.RulesModelMixin``.
+  /api/v2/iotawatts/{id}/:
+    get:
+      operationId: iotawatts_retrieve
+      description: List and retrieve IoTaWatts by their globally unique ID.
       parameters:
       - in: path
-        name: ref
+        name: id
         schema:
           type: string
+          description: '8 chars max (atm allowing up to 12 for legacy): site|letter  e.g.
+            ptw01a eb01b eb01c'
         required: true
       tags:
-      - fleets
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/PatchedFleet'
-          application/x-www-form-urlencoded:
-            schema:
-              $ref: '#/components/schemas/PatchedFleet'
-          multipart/form-data:
-            schema:
-              $ref: '#/components/schemas/PatchedFleet'
+      - iotawatts
       security:
       - tokenAuth: []
       - cookieAuth: []
@@ -302,31 +101,34 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Fleet'
+                $ref: '#/components/schemas/IotaWattDetail'
           description: ''
-    delete:
-      operationId: fleets_destroy
-      description: |-
-        Enforces object-level permissions in ``rest_framework.viewsets.ViewSet``,
-        deriving the permission type from the particular action to be performed..
-
-        As with ``rules.contrib.views.AutoPermissionRequiredMixin``, this only works when
-        model permissions are registered using ``rules.contrib.models.RulesModelMixin``.
+  /api/v2/iotawatts/{id}/config/:
+    get:
+      operationId: iotawatts_config_retrieve
+      description: List and retrieve IoTaWatts by their globally unique ID.
       parameters:
       - in: path
-        name: ref
+        name: id
         schema:
           type: string
+          description: '8 chars max (atm allowing up to 12 for legacy): site|letter  e.g.
+            ptw01a eb01b eb01c'
         required: true
       tags:
-      - fleets
+      - iotawatts
       security:
       - tokenAuth: []
       - cookieAuth: []
       responses:
-        '204':
-          description: No response body
-  /api/v1/login/:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+  /api/v2/login/:
     post:
       operationId: login_create
       description: |-
@@ -362,7 +164,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Token'
           description: ''
-  /api/v1/logout/:
+  /api/v2/logout/:
     post:
       operationId: logout_create
       description: |-
@@ -383,7 +185,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/RestAuthDetail'
           description: ''
-  /api/v1/password/change/:
+  /api/v2/password/change/:
     post:
       operationId: password_change_create
       description: |-
@@ -415,7 +217,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/RestAuthDetail'
           description: ''
-  /api/v1/password/reset/:
+  /api/v2/password/reset/:
     post:
       operationId: password_reset_create
       description: |-
@@ -448,7 +250,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/RestAuthDetail'
           description: ''
-  /api/v1/password/reset/confirm/:
+  /api/v2/password/reset/confirm/:
     post:
       operationId: password_reset_confirm_create
       description: |-
@@ -483,7 +285,585 @@ paths:
               schema:
                 $ref: '#/components/schemas/RestAuthDetail'
           description: ''
-  /api/v1/token/:
+  /api/v2/routers/:
+    get:
+      operationId: routers_list
+      parameters:
+      - name: id
+        required: false
+        in: query
+        description: Exact ID or comma-separated IDs.
+        schema:
+          type: string
+      tags:
+      - routers
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/RouterSummary'
+          description: ''
+    post:
+      operationId: routers_create
+      tags:
+      - routers
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RouterCreate'
+        required: true
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RouterDetail'
+          description: ''
+  /api/v2/routers/{id}/:
+    get:
+      operationId: routers_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          description: e.g. ptw01r1, nbm03r2
+        required: true
+      tags:
+      - routers
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RouterDetail'
+          description: ''
+    patch:
+      operationId: routers_partial_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          description: e.g. ptw01r1, nbm03r2
+        required: true
+      tags:
+      - routers
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedRouterUpdate'
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RouterDetail'
+          description: ''
+  /api/v2/sites/:
+    get:
+      operationId: sites_list
+      description: List useful Site scan rows and retrieve Site configuration detail.
+      parameters:
+      - in: query
+        name: data_status
+        schema:
+          type: string
+        description: Exact DataStatus name or comma-separated names.
+      - name: id
+        required: false
+        in: query
+        description: Exact ID or comma-separated IDs.
+        schema:
+          type: string
+      - in: query
+        name: name_prefix
+        schema:
+          type: string
+        description: Case-insensitive Site name prefix.
+      - in: query
+        name: solar_status
+        schema:
+          type: string
+        description: Exact SolarStatus name or comma-separated names.
+      tags:
+      - sites
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/SiteSummary'
+          description: ''
+  /api/v2/sites/{id}/:
+    get:
+      operationId: sites_retrieve
+      description: List useful Site scan rows and retrieve Site configuration detail.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - sites
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SiteDetail'
+          description: ''
+  /api/v2/sites/{site_id}/actions/{id}/:
+    patch:
+      operationId: sites_actions_partial_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: site_id
+        schema:
+          type: string
+        required: true
+      tags:
+      - sites
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedAction'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedAction'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedAction'
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Action'
+          description: ''
+  /api/v2/sites/{site_id}/iotawatts/:
+    get:
+      operationId: sites_iotawatts_list
+      description: List a Site's IoTaWatts.
+      parameters:
+      - name: id
+        required: false
+        in: query
+        description: Exact ID or comma-separated IDs.
+        schema:
+          type: string
+      - in: path
+        name: site_id
+        schema:
+          type: string
+        required: true
+      tags:
+      - sites
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/IotaWattSummary'
+          description: ''
+  /api/v2/sites/{site_id}/metrics/:
+    get:
+      operationId: sites_metrics_list
+      description: |-
+        Metric metadata (labels for time-series keys) nested under a Site.
+
+        llm: Each mixin supplies one action; the URLconf (``phisaverapi/urls.py``)
+        decides which are exposed, and ``get_permissions``/``get_site`` decide who
+        may use them:
+
+        ==================  ==============  ===============  ===========================
+        Mixin               Route           Who              Sites searched
+        ==================  ==============  ===============  ===========================
+        ListModelMixin      GET list        authenticated    ``viewable_sites`` (member
+        RetrieveModelMixin  GET detail      authenticated    or Fleet member: read-only)
+        UpdateModelMixin    PATCH detail    authenticated    ``direct_sites`` (direct
+                                                             Site members only)
+        CreateModelMixin    POST list       superuser        all Sites
+        DestroyModelMixin   DELETE detail   superuser        all Sites (via direct_sites,
+                                                             which is all for superusers)
+        ==================  ==============  ===============  ===========================
+
+        ``UpdateModelMixin`` also provides ``update`` (PUT), but PUT is not routed;
+        only PATCH is exposed. See ``SiteMetric`` for why access is split this way.
+      parameters:
+      - name: id
+        required: false
+        in: query
+        description: Exact ID or comma-separated IDs.
+        schema:
+          type: string
+      - in: path
+        name: site_id
+        schema:
+          type: string
+        required: true
+      tags:
+      - sites
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/SiteMetric'
+          description: ''
+    post:
+      operationId: sites_metrics_create
+      description: |-
+        Metric metadata (labels for time-series keys) nested under a Site.
+
+        llm: Each mixin supplies one action; the URLconf (``phisaverapi/urls.py``)
+        decides which are exposed, and ``get_permissions``/``get_site`` decide who
+        may use them:
+
+        ==================  ==============  ===============  ===========================
+        Mixin               Route           Who              Sites searched
+        ==================  ==============  ===============  ===========================
+        ListModelMixin      GET list        authenticated    ``viewable_sites`` (member
+        RetrieveModelMixin  GET detail      authenticated    or Fleet member: read-only)
+        UpdateModelMixin    PATCH detail    authenticated    ``direct_sites`` (direct
+                                                             Site members only)
+        CreateModelMixin    POST list       superuser        all Sites
+        DestroyModelMixin   DELETE detail   superuser        all Sites (via direct_sites,
+                                                             which is all for superusers)
+        ==================  ==============  ===============  ===========================
+
+        ``UpdateModelMixin`` also provides ``update`` (PUT), but PUT is not routed;
+        only PATCH is exposed. See ``SiteMetric`` for why access is split this way.
+      parameters:
+      - in: path
+        name: site_id
+        schema:
+          type: string
+        required: true
+      tags:
+      - sites
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SiteMetricCreate'
+        required: true
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SiteMetric'
+          description: ''
+  /api/v2/sites/{site_id}/metrics/{id}/:
+    get:
+      operationId: sites_metrics_retrieve
+      description: |-
+        Metric metadata (labels for time-series keys) nested under a Site.
+
+        llm: Each mixin supplies one action; the URLconf (``phisaverapi/urls.py``)
+        decides which are exposed, and ``get_permissions``/``get_site`` decide who
+        may use them:
+
+        ==================  ==============  ===============  ===========================
+        Mixin               Route           Who              Sites searched
+        ==================  ==============  ===============  ===========================
+        ListModelMixin      GET list        authenticated    ``viewable_sites`` (member
+        RetrieveModelMixin  GET detail      authenticated    or Fleet member: read-only)
+        UpdateModelMixin    PATCH detail    authenticated    ``direct_sites`` (direct
+                                                             Site members only)
+        CreateModelMixin    POST list       superuser        all Sites
+        DestroyModelMixin   DELETE detail   superuser        all Sites (via direct_sites,
+                                                             which is all for superusers)
+        ==================  ==============  ===============  ===========================
+
+        ``UpdateModelMixin`` also provides ``update`` (PUT), but PUT is not routed;
+        only PATCH is exposed. See ``SiteMetric`` for why access is split this way.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      - in: path
+        name: site_id
+        schema:
+          type: string
+        required: true
+      tags:
+      - sites
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SiteMetric'
+          description: ''
+    patch:
+      operationId: sites_metrics_partial_update
+      description: |-
+        Metric metadata (labels for time-series keys) nested under a Site.
+
+        llm: Each mixin supplies one action; the URLconf (``phisaverapi/urls.py``)
+        decides which are exposed, and ``get_permissions``/``get_site`` decide who
+        may use them:
+
+        ==================  ==============  ===============  ===========================
+        Mixin               Route           Who              Sites searched
+        ==================  ==============  ===============  ===========================
+        ListModelMixin      GET list        authenticated    ``viewable_sites`` (member
+        RetrieveModelMixin  GET detail      authenticated    or Fleet member: read-only)
+        UpdateModelMixin    PATCH detail    authenticated    ``direct_sites`` (direct
+                                                             Site members only)
+        CreateModelMixin    POST list       superuser        all Sites
+        DestroyModelMixin   DELETE detail   superuser        all Sites (via direct_sites,
+                                                             which is all for superusers)
+        ==================  ==============  ===============  ===========================
+
+        ``UpdateModelMixin`` also provides ``update`` (PUT), but PUT is not routed;
+        only PATCH is exposed. See ``SiteMetric`` for why access is split this way.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      - in: path
+        name: site_id
+        schema:
+          type: string
+        required: true
+      tags:
+      - sites
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedSiteMetric'
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SiteMetric'
+          description: ''
+    delete:
+      operationId: sites_metrics_destroy
+      description: |-
+        Metric metadata (labels for time-series keys) nested under a Site.
+
+        llm: Each mixin supplies one action; the URLconf (``phisaverapi/urls.py``)
+        decides which are exposed, and ``get_permissions``/``get_site`` decide who
+        may use them:
+
+        ==================  ==============  ===============  ===========================
+        Mixin               Route           Who              Sites searched
+        ==================  ==============  ===============  ===========================
+        ListModelMixin      GET list        authenticated    ``viewable_sites`` (member
+        RetrieveModelMixin  GET detail      authenticated    or Fleet member: read-only)
+        UpdateModelMixin    PATCH detail    authenticated    ``direct_sites`` (direct
+                                                             Site members only)
+        CreateModelMixin    POST list       superuser        all Sites
+        DestroyModelMixin   DELETE detail   superuser        all Sites (via direct_sites,
+                                                             which is all for superusers)
+        ==================  ==============  ===============  ===========================
+
+        ``UpdateModelMixin`` also provides ``update`` (PUT), but PUT is not routed;
+        only PATCH is exposed. See ``SiteMetric`` for why access is split this way.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      - in: path
+        name: site_id
+        schema:
+          type: string
+        required: true
+      tags:
+      - sites
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/v2/sites/{site_id}/switchboards/:
+    get:
+      operationId: sites_switchboards_list
+      parameters:
+      - name: id
+        required: false
+        in: query
+        description: Exact ID or comma-separated IDs.
+        schema:
+          type: string
+      - in: path
+        name: site_id
+        schema:
+          type: string
+        required: true
+      tags:
+      - sites
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/SwitchBoardSummary'
+          description: ''
+  /api/v2/sites/{site_id}/switchboards/{id}/:
+    get:
+      operationId: sites_switchboards_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      - in: path
+        name: site_id
+        schema:
+          type: string
+        required: true
+      tags:
+      - sites
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SwitchBoardDetail'
+          description: ''
+  /api/v2/sites/{site_id}/switchboards/{switchboard_id}/poles/:
+    get:
+      operationId: sites_switchboards_poles_list
+      parameters:
+      - name: id
+        required: false
+        in: query
+        description: Exact ID or comma-separated IDs.
+        schema:
+          type: string
+      - in: path
+        name: site_id
+        schema:
+          type: string
+        required: true
+      - in: path
+        name: switchboard_id
+        schema:
+          type: string
+        required: true
+      tags:
+      - sites
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Pole'
+          description: ''
+  /api/v2/sites/{site_id}/switchboards/{switchboard_id}/poles/{id}/:
+    get:
+      operationId: sites_switchboards_poles_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      - in: path
+        name: site_id
+        schema:
+          type: string
+        required: true
+      - in: path
+        name: switchboard_id
+        schema:
+          type: string
+        required: true
+      tags:
+      - sites
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Pole'
+          description: ''
+  /api/v2/token/:
     post:
       operationId: token_create
       tags:
@@ -510,7 +890,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/AuthToken'
           description: ''
-  /api/v1/ts/heatmap/:
+  /api/v2/ts/heatmap/:
     get:
       operationId: ts_heatmap_retrieve
       parameters:
@@ -540,8 +920,8 @@ paths:
         name: duration
         schema:
           type: string
-        description: 'Alternative to stop: a pandas compatible timedelta or plain
-          seconds'
+        description: 'Alternative to start: a pandas compatible timedelta or plain
+          seconds. The range ends at stop (default now). Do not combine with start.'
       - in: query
         name: engine
         schema:
@@ -561,14 +941,7 @@ paths:
         schema:
           type: string
           minLength: 1
-        description: fleet (e,g fleet1), equivalent to ?sites=site1,site2,site3
-      - in: query
-        name: format
-        schema:
-          type: string
-          enum:
-          - csv
-          - json
+        description: Not supported for heatmap queries (use sites)
       - in: query
         name: metcat
         schema:
@@ -579,10 +952,11 @@ paths:
           - net
           - calc
           - other
+          - all
           type: string
           minLength: 1
         description: |-
-          Category of metrics (one of load, battery, production, net, calc, other
+          Category of metrics (one of load, battery, production, net, calc, other, all
 
           * `load` - load
           * `battery` - battery
@@ -590,6 +964,7 @@ paths:
           * `net` - net
           * `calc` - calc
           * `other` - other
+          * `all` - all
       - in: query
         name: mets
         schema:
@@ -608,7 +983,7 @@ paths:
         schema:
           type: string
           minLength: 1
-        description: Comma‐delimited site identifiers
+        description: A single site identifier (heatmap queries support one site)
       - in: query
         name: source
         schema:
@@ -638,7 +1013,7 @@ paths:
         schema:
           type: string
           format: date-time
-        description: Stop time (exclusive). ISO8601 or epoch.
+        description: Stop time (exclusive). ISO8601 or epoch. Defaults to now.
       - in: query
         name: timeformat
         schema:
@@ -683,295 +1058,23 @@ paths:
             application/json:
               schema:
                 type: object
-                description: Device refs mapped to heatmap data
+                description: The single requested site ref mapped to heatmap data
                 additionalProperties:
                   type: object
-                  description: Metric names mapped to time series data points
+                  description: SiteMetric names mapped to [day of year, hour, W] points
                   additionalProperties:
                     type: array
                     items:
                       type: array
-                      items:
-                      - type: string
-                        format: date
-                        description: Date (YYYY-MM-DD)
-                      - type: string
-                        format: time
-                        description: Time (HH:MM)
-                      - type: number
-                        format: float
-                        description: Value
+                      description: '[day of year (1-365), hour (0-23), mean metric
+                        value]'
+                      items: {}
                       minItems: 3
                       maxItems: 3
-            text/csv:
-              schema:
-                type: object
-                description: Device refs mapped to heatmap data
-                additionalProperties:
-                  type: object
-                  description: Metric names mapped to time series data points
-                  additionalProperties:
-                    type: array
-                    items:
-                      type: array
-                      items:
-                      - type: string
-                        format: date
-                        description: Date (YYYY-MM-DD)
-                      - type: string
-                        format: time
-                        description: Time (HH:MM)
-                      - type: number
-                        format: float
-                        description: Value
-                      minItems: 3
-                      maxItems: 3
-          description: ''
-  /api/v1/ts/metrics/:
-    get:
-      operationId: ts_metrics_retrieve
-      description: Return metadata about metrics
-      parameters:
-      - in: query
-        name: attribute
-        schema:
-          enum:
-          - power
-          - voltage
-          - current
-          - pf
-          - soc
-          - status
-          type: string
-          default: power
-          minLength: 1
-        description: |-
-          Attributes to return. Choices are ['power', 'voltage', 'current', 'pf', 'soc', 'status']. Default is 'power'.
-
-          * `power` - POWER
-          * `voltage` - VOLTAGE
-          * `current` - CURRENT
-          * `pf` - PF
-          * `soc` - SOC
-          * `status` - STATUS
-      - in: query
-        name: duration
-        schema:
-          type: string
-        description: 'Alternative to stop: a pandas compatible timedelta or plain
-          seconds'
-      - in: query
-        name: engine
-        schema:
-          enum:
-          - influx
-          - timescale
-          type: string
-          default: influx
-          minLength: 1
-        description: |-
-          Database engine to use for the query (one of ['influx', 'timescale'])
-
-          * `influx` - INFLUX
-          * `timescale` - TIMESCALE
-      - in: query
-        name: fleet
-        schema:
-          type: string
-          minLength: 1
-        description: fleet (e,g fleet1), equivalent to ?sites=site1,site2,site3
-      - in: query
-        name: format
-        schema:
-          type: string
-          enum:
-          - csv
-          - json
-      - in: query
-        name: metcat
-        schema:
-          enum:
-          - load
-          - battery
-          - production
-          - net
-          - calc
-          - other
-          type: string
-          minLength: 1
-        description: |-
-          Category of metrics (one of load, battery, production, net, calc, other
-
-          * `load` - load
-          * `battery` - battery
-          * `production` - production
-          * `net` - net
-          * `calc` - calc
-          * `other` - other
-      - in: query
-        name: mets
-        schema:
-          type: string
-          minLength: 1
-        description: Comma-delimited metric names (e.g. Net,Import)
-      - in: query
-        name: named
-        schema:
-          type: boolean
-          default: false
-        description: 'Convert site ref like ''bai'' to name ''Big Access Incoming''
-          (default: False). '
-      - in: query
-        name: sites
-        schema:
-          type: string
-          minLength: 1
-        description: Comma‐delimited site identifiers
-      - in: query
-        name: source
-        schema:
-          enum:
-          - iotawatt
-          - inverter
-          - nem
-          - calc
-          type: string
-          default: iotawatt
-          minLength: 1
-        description: |-
-          Data source to query (one of ['iotawatt', 'inverter', 'nem', 'calc']). Default is 'iotawatt'
-
-          * `iotawatt` - iotawatt
-          * `inverter` - inverter
-          * `nem` - nem
-          * `calc` - calc
-      - in: query
-        name: start
-        schema:
-          type: string
-          format: date-time
-        description: Start time (inclusive). ISO8601 or epoch.
-      - in: query
-        name: stop
-        schema:
-          type: string
-          format: date-time
-        description: Stop time (exclusive). ISO8601 or epoch.
-      - in: query
-        name: timeformat
-        schema:
-          enum:
-          - iso
-          - epoch
-          - epochms
-          type: string
-          minLength: 1
-        description: |-
-          Output format for timestamps (one of ['iso', 'epoch', 'epochms'])
-
-          * `iso` - ISO8601
-          * `epoch` - EPOCH
-          * `epochms` - EPOCH_MS
-      - in: query
-        name: timezone
-        schema:
-          type: string
-          minLength: 1
-        description: IANA timezone string (e.g. 'Australia/Brisbane'). Defaults to
-          first site TZ
-      - in: query
-        name: units
-        schema:
-          enum:
-          - kW
-          - W
-          - kWh/day
-          - $/day
-          type: string
-          minLength: 1
-        description: |-
-          Units of measurement for the attribute (one of {', '.join(Units.values())}). Default is 'W' for power.
-
-          * `kW` - kW
-          * `W` - W
-          * `kWh/day` - kWh/day
-          * `$/day` - $/day
-      tags:
-      - ts
-      security:
-      - tokenAuth: []
-      - cookieAuth: []
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                type: object
-                description: Device refs mapped to their metrics metadata
-                additionalProperties:
-                  type: object
-                  required:
-                  - metrics
-                  properties:
-                    metrics:
-                      type: object
-                      description: Metric names mapped to their metadata
-                      additionalProperties:
-                        type: object
-                        required:
-                        - description
-                        - category
-                        properties:
-                          description:
-                            type: string
-                          category:
-                            type: string
-              examples:
-                Example:
-                  value:
-                    device1:
-                      metrics:
-                        metric1:
-                          description: blah blah
-                          category: load
-                        metric2:
-                          description: blah blah
-                          category: load
-            text/csv:
-              schema:
-                type: object
-                description: Device refs mapped to their metrics metadata
-                additionalProperties:
-                  type: object
-                  required:
-                  - metrics
-                  properties:
-                    metrics:
-                      type: object
-                      description: Metric names mapped to their metadata
-                      additionalProperties:
-                        type: object
-                        required:
-                        - description
-                        - category
-                        properties:
-                          description:
-                            type: string
-                          category:
-                            type: string
-              examples:
-                Example:
-                  value:
-                    device1:
-                      metrics:
-                        metric1:
-                          description: blah blah
-                          category: load
-                        metric2:
-                          description: blah blah
-                          category: load
-          description: Metadata about metrics
-  /api/v1/ts/series/:
+          description: 'Heatmap data as JSON: hourly mean power (W) for one site,
+            pivoted by day of year (1-365) and hour (0-23). The same day in different
+            years is averaged.'
+  /api/v2/ts/series/:
     get:
       operationId: ts_series_retrieve
       parameters:
@@ -1001,19 +1104,15 @@ paths:
         name: bin
         schema:
           type: string
-          examples:
-          - 1h
-          - 30min
-          - 1d
-          - 1ME
+          example: 1h, 30min, 1d, 1ME
         description: Bin duration (e.g. '1h', '30min', '1ME', pd.DateOffset)
         required: true
       - in: query
         name: duration
         schema:
           type: string
-        description: 'Alternative to stop: a pandas compatible timedelta or plain
-          seconds'
+        description: 'Alternative to start: a pandas compatible timedelta or plain
+          seconds. The range ends at stop (default now). Do not combine with start.'
       - in: query
         name: engine
         schema:
@@ -1035,13 +1134,6 @@ paths:
           minLength: 1
         description: fleet (e,g fleet1), equivalent to ?sites=site1,site2,site3
       - in: query
-        name: format
-        schema:
-          type: string
-          enum:
-          - csv
-          - json
-      - in: query
         name: function
         schema:
           enum:
@@ -1050,7 +1142,7 @@ paths:
           default: mean
           minLength: 1
         description: |-
-          [mean (default), sum, max]
+          Aggregation function. Only 'mean' (default) is currently supported.
 
           * `mean` - mean
       - in: query
@@ -1063,10 +1155,11 @@ paths:
           - net
           - calc
           - other
+          - all
           type: string
           minLength: 1
         description: |-
-          Category of metrics (one of load, battery, production, net, calc, other
+          Category of metrics (one of load, battery, production, net, calc, other, all
 
           * `load` - load
           * `battery` - battery
@@ -1074,6 +1167,7 @@ paths:
           * `net` - net
           * `calc` - calc
           * `other` - other
+          * `all` - all
       - in: query
         name: mets
         schema:
@@ -1122,7 +1216,7 @@ paths:
         schema:
           type: string
           format: date-time
-        description: Stop time (exclusive). ISO8601 or epoch.
+        description: Stop time (exclusive). ISO8601 or epoch. Defaults to now.
       - in: query
         name: timeformat
         schema:
@@ -1156,7 +1250,7 @@ paths:
           type: string
           minLength: 1
         description: |-
-          Units of measurement for the attribute (one of {', '.join(Units.values())}). Default is 'W' for power.
+          Units of measurement for the attribute (one of kW, W, kWh/day, $/day). Default is 'W' for power.
 
           * `kW` - kW
           * `W` - W
@@ -1173,75 +1267,29 @@ paths:
             application/json:
               schema:
                 type: object
-                description: Device refs mapped to their metric data
+                description: Site refs mapped to their metric data
                 additionalProperties:
                   type: object
-                  description: Metric names mapped to time series arrays
+                  description: SiteMetric names mapped to time series arrays
                   additionalProperties:
                     type: array
                     items:
                       type: array
-                      items:
-                      - oneOf:
-                        - type: integer
-                          description: Unix timestamp (seconds)
-                        - type: integer
-                          description: Unix timestamp (milliseconds)
-                        - type: string
-                          format: date-time
-                          description: ISO 8601 timestamp
-                        description: 'Timestamp (format depends on timeformat parameter:
-                          ''epoch'', ''epochms'', or ''iso'')'
-                      - type: number
-                        description: Metric value
+                      description: '[timestamp, metric value]'
+                      items: {}
                       minItems: 2
                       maxItems: 2
               examples:
                 Example:
                   value:
-                    device1:
-                      Net:
-                      - - 1672531199
-                        - 0.5
-                      - - 1672531200
-                        - 0.6
-            text/csv:
-              schema:
-                type: object
-                description: Device refs mapped to their metric data
-                additionalProperties:
-                  type: object
-                  description: Metric names mapped to time series arrays
-                  additionalProperties:
-                    type: array
-                    items:
-                      type: array
-                      items:
-                      - oneOf:
-                        - type: integer
-                          description: Unix timestamp (seconds)
-                        - type: integer
-                          description: Unix timestamp (milliseconds)
-                        - type: string
-                          format: date-time
-                          description: ISO 8601 timestamp
-                        description: 'Timestamp (format depends on timeformat parameter:
-                          ''epoch'', ''epochms'', or ''iso'')'
-                      - type: number
-                        description: Metric value
-                      minItems: 2
-                      maxItems: 2
-              examples:
-                Example:
-                  value:
-                    device1:
+                    site1:
                       Net:
                       - - 1672531199
                         - 0.5
                       - - 1672531200
                         - 0.6
           description: Time series data as JSON
-  /api/v1/ts/table/:
+  /api/v2/ts/table/:
     get:
       operationId: ts_table_retrieve
       description: Return data as table (i.e. without timestamps)
@@ -1272,8 +1320,8 @@ paths:
         name: duration
         schema:
           type: string
-        description: 'Alternative to stop: a pandas compatible timedelta or plain
-          seconds'
+        description: 'Alternative to start: a pandas compatible timedelta or plain
+          seconds. The range ends at stop (default now). Do not combine with start.'
       - in: query
         name: engine
         schema:
@@ -1295,13 +1343,6 @@ paths:
           minLength: 1
         description: fleet (e,g fleet1), equivalent to ?sites=site1,site2,site3
       - in: query
-        name: format
-        schema:
-          type: string
-          enum:
-          - csv
-          - json
-      - in: query
         name: function
         schema:
           enum:
@@ -1310,7 +1351,7 @@ paths:
           default: mean
           minLength: 1
         description: |-
-          [mean (default), sum, max]
+          Aggregation function. Only 'mean' (default) is currently supported.
 
           * `mean` - mean
       - in: query
@@ -1323,10 +1364,11 @@ paths:
           - net
           - calc
           - other
+          - all
           type: string
           minLength: 1
         description: |-
-          Category of metrics (one of load, battery, production, net, calc, other
+          Category of metrics (one of load, battery, production, net, calc, other, all
 
           * `load` - load
           * `battery` - battery
@@ -1334,6 +1376,7 @@ paths:
           * `net` - net
           * `calc` - calc
           * `other` - other
+          * `all` - all
       - in: query
         name: mets
         schema:
@@ -1382,7 +1425,7 @@ paths:
         schema:
           type: string
           format: date-time
-        description: Stop time (exclusive). ISO8601 or epoch.
+        description: Stop time (exclusive). ISO8601 or epoch. Defaults to now.
       - in: query
         name: timeformat
         schema:
@@ -1416,7 +1459,7 @@ paths:
           type: string
           minLength: 1
         description: |-
-          Units of measurement for the attribute (one of {', '.join(Units.values())}). Default is 'W' for power.
+          Units of measurement for the attribute (one of kW, W, kWh/day, $/day). Default is 'W' for power.
 
           * `kW` - kW
           * `W` - W
@@ -1433,51 +1476,19 @@ paths:
             application/json:
               schema:
                 type: object
-                description: Device refs mapped to their metric data
+                description: Site refs mapped to their metric data
                 additionalProperties:
-                  type: array
-                  items:
-                    type: array
-                    items:
-                    - type: string
-                      description: Metric name
-                    - type: number
-                      description: Metric value
-                    minItems: 2
-                    maxItems: 2
+                  type: object
+                  additionalProperties:
+                    type: number
               examples:
                 Example:
                   value:
                     hfs01:
-                    - - Net
-                      - 123.45
-                    - - Import
-                      - 678.9
-            text/csv:
-              schema:
-                type: object
-                description: Device refs mapped to their metric data
-                additionalProperties:
-                  type: array
-                  items:
-                    type: array
-                    items:
-                    - type: string
-                      description: Metric name
-                    - type: number
-                      description: Metric value
-                    minItems: 2
-                    maxItems: 2
-              examples:
-                Example:
-                  value:
-                    hfs01:
-                    - - Net
-                      - 123.45
-                    - - Import
-                      - 678.9
+                      Net: 123.45
+                      Import: 678.9
           description: Table data as JSON
-  /api/v1/user/:
+  /api/v2/user/:
     get:
       operationId: user_retrieve
       description: |-
@@ -1569,214 +1580,34 @@ paths:
               schema:
                 $ref: '#/components/schemas/UserDetails'
           description: ''
-  /api/v1/users/:
-    get:
-      operationId: users_list
-      tags:
-      - users
-      security:
-      - tokenAuth: []
-      - cookieAuth: []
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/User'
-          description: ''
-    post:
-      operationId: users_create
-      tags:
-      - users
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/User'
-          application/x-www-form-urlencoded:
-            schema:
-              $ref: '#/components/schemas/User'
-          multipart/form-data:
-            schema:
-              $ref: '#/components/schemas/User'
-        required: true
-      security:
-      - tokenAuth: []
-      - cookieAuth: []
-      responses:
-        '201':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/User'
-          description: ''
-  /api/v1/users/{id}/:
-    get:
-      operationId: users_retrieve
-      parameters:
-      - in: path
-        name: id
-        schema:
-          type: integer
-        description: A unique integer value identifying this PhiUser.
-        required: true
-      tags:
-      - users
-      security:
-      - tokenAuth: []
-      - cookieAuth: []
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/User'
-          description: ''
-    put:
-      operationId: users_update
-      parameters:
-      - in: path
-        name: id
-        schema:
-          type: integer
-        description: A unique integer value identifying this PhiUser.
-        required: true
-      tags:
-      - users
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/User'
-          application/x-www-form-urlencoded:
-            schema:
-              $ref: '#/components/schemas/User'
-          multipart/form-data:
-            schema:
-              $ref: '#/components/schemas/User'
-        required: true
-      security:
-      - tokenAuth: []
-      - cookieAuth: []
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/User'
-          description: ''
-    patch:
-      operationId: users_partial_update
-      parameters:
-      - in: path
-        name: id
-        schema:
-          type: integer
-        description: A unique integer value identifying this PhiUser.
-        required: true
-      tags:
-      - users
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/PatchedUser'
-          application/x-www-form-urlencoded:
-            schema:
-              $ref: '#/components/schemas/PatchedUser'
-          multipart/form-data:
-            schema:
-              $ref: '#/components/schemas/PatchedUser'
-      security:
-      - tokenAuth: []
-      - cookieAuth: []
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/User'
-          description: ''
-    delete:
-      operationId: users_destroy
-      parameters:
-      - in: path
-        name: id
-        schema:
-          type: integer
-        description: A unique integer value identifying this PhiUser.
-        required: true
-      tags:
-      - users
-      security:
-      - tokenAuth: []
-      - cookieAuth: []
-      responses:
-        '204':
-          description: No response body
-  /api/v1/users/{id}/claim/{ref}/:
-    patch:
-      operationId: users_claim_partial_update
-      description: |-
-        /user/1/device/hfs01a/
-        PATCH data { claim_token: "xxxx" }
-        Device(hfs01a).claim_token must match
-        Return 200 with user with additional device
-      parameters:
-      - in: path
-        name: id
-        schema:
-          type: integer
-        description: A unique integer value identifying this PhiUser.
-        required: true
-      - in: path
-        name: ref
-        schema:
-          type: string
-        description: Device reference (string)
-        required: true
-      tags:
-      - users
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/PatchedUser'
-          application/x-www-form-urlencoded:
-            schema:
-              $ref: '#/components/schemas/PatchedUser'
-          multipart/form-data:
-            schema:
-              $ref: '#/components/schemas/PatchedUser'
-      security:
-      - tokenAuth: []
-      - cookieAuth: []
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/User'
-          description: ''
-  /api/v1/users/current/:
-    get:
-      operationId: users_current_retrieve
-      tags:
-      - users
-      security:
-      - tokenAuth: []
-      - cookieAuth: []
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/User'
-          description: ''
 components:
   schemas:
+    Action:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+          maxLength: 64
+        status:
+          $ref: '#/components/schemas/StatusEnum'
+      required:
+      - id
+      - name
+    ActionSummary:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+          maxLength: 64
+      required:
+      - id
+      - name
     AuthToken:
       type: object
       properties:
@@ -1793,188 +1624,186 @@ components:
       - password
       - token
       - username
-    Device:
+    BlankEnum:
+      enum:
+      - ''
+    CT:
       type: object
       properties:
-        id:
+        channel:
           type: integer
-          readOnly: true
-        ref:
-          type: string
-          maxLength: 50
+          maximum: 14
+          minimum: 1
+          nullable: true
         name:
           type: string
-          maxLength: 200
-        title:
+          description: 20 chars max, underscores numbers and letter, starting with
+            a letter
+          pattern: '[A-Za-z]{1}[_a-zA-Z0-9]{3,19}'
+          maxLength: 128
+        phase:
+          $ref: '#/components/schemas/PhaseEnum'
+        comment:
           type: string
-        name_ref:
-          type: string
-          readOnly: true
-        latitude:
-          type: number
-          format: double
-        longitude:
-          type: number
-          format: double
-        owner_full_name:
-          type: string
-          readOnly: true
-          default: ''
-        site_status:
-          type: string
-        solar:
-          type: string
-          readOnly: true
-          default: Unknown
-        latest:
-          type: string
-          format: date-time
-          readOnly: true
-          nullable: true
-        latest_ago:
-          type: integer
-          description: |-
-            Return seconds since last data
-            -666 if no latest data (to distinguish from 0 and allow nice formatting in grafana)
-          readOnly: true
-          nullable: true
-        images:
+          maxLength: 256
+        poles:
           type: array
           items:
             type: string
           readOnly: true
-          description: List of image URLs for this device
-        rates:
-          $ref: '#/components/schemas/Rates'
-        metrics:
-          type: array
-          items:
-            $ref: '#/components/schemas/MetricLabel'
-          readOnly: true
-          default: []
-        videos:
-          type: array
-          items:
-            $ref: '#/components/schemas/DeviceVideo'
-          readOnly: true
-        users:
-          type: array
-          items:
-            type: integer
-          description: Each device may have many users
-        timezone:
+        ct_model:
           type: string
           readOnly: true
-        goodwe_site_id:
-          type: string
-        battery:
-          type: boolean
       required:
-      - id
-      - images
-      - latest
-      - latest_ago
-      - metrics
-      - name
-      - name_ref
-      - owner_full_name
-      - ref
-      - solar
-      - timezone
-      - videos
-    DeviceShortDetails:
-      type: object
-      description: Inline serializer for device details in fleet response
-      properties:
-        name:
-          type: string
-        id:
-          type: integer
-        last_data:
-          type: string
-          format: date-time
-          nullable: true
-      required:
-      - id
-      - last_data
-      - name
-    DeviceVideo:
+      - ct_model
+      - poles
+    FleetDetail:
       type: object
       properties:
         id:
-          type: integer
+          type: string
           readOnly: true
         name:
           type: string
           maxLength: 64
-        url:
+        timezone:
           type: string
-          format: uri
-          maxLength: 200
-        thumbnail:
+          readOnly: true
+        sites:
+          type: array
+          items:
+            $ref: '#/components/schemas/SiteSummary'
+          readOnly: true
+      required:
+      - id
+      - name
+      - sites
+      - timezone
+    FleetSummary:
+      type: object
+      properties:
+        id:
           type: string
-          format: uri
-          maxLength: 200
+          readOnly: true
+        name:
+          type: string
+          maxLength: 64
+        timezone:
+          type: string
+          readOnly: true
+        site_count:
+          type: integer
+          readOnly: true
+      required:
+      - id
+      - name
+      - site_count
+      - timezone
+    ImageSummary:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+          readOnly: true
+      required:
+      - id
+      - name
+    IotaWattDetail:
+      type: object
+      properties:
+        id:
+          type: string
+          readOnly: true
+        name:
+          type: string
+          readOnly: true
+        router:
+          allOf:
+          - $ref: '#/components/schemas/RouterReference'
+          readOnly: true
+          nullable: true
+        switchboard:
+          allOf:
+          - $ref: '#/components/schemas/SwitchBoardReference'
+          readOnly: true
+        vpn_url:
+          type: string
+          nullable: true
+          description: Return the mapped IoTaWatt VPN URL, if its router is known.
+          readOnly: true
+        cts:
+          type: array
+          items:
+            $ref: '#/components/schemas/CT'
+          readOnly: true
+        suffix_letter:
+          type: string
+          description: Letter to Unique to site. Must be unique within its Site, and
+            match ref's suffix
+          pattern: '[a-z]'
+          maxLength: 1
         description:
           type: string
-          maxLength: 128
-        created:
-          type: string
-          format: date-time
-          readOnly: true
-        device:
-          type: integer
+          maxLength: 256
+        vt_model:
+          $ref: '#/components/schemas/VtModelEnum'
+        vt_phase:
           nullable: true
-        fleet:
-          type: integer
+          oneOf:
+          - $ref: '#/components/schemas/PhaseEnum'
+          - $ref: '#/components/schemas/BlankEnum'
+          - $ref: '#/components/schemas/NullEnum'
+        phase_rotation:
           nullable: true
+          oneOf:
+          - $ref: '#/components/schemas/PhaseRotationEnum'
+          - $ref: '#/components/schemas/BlankEnum'
+          - $ref: '#/components/schemas/NullEnum'
       required:
-      - created
+      - cts
       - id
       - name
-      - url
-    Fleet:
+      - router
+      - switchboard
+      - vpn_url
+    IotaWattReference:
       type: object
       properties:
         id:
-          type: integer
-          readOnly: true
-        ref:
           type: string
-          maxLength: 50
+          readOnly: true
         name:
           type: string
-          maxLength: 64
-        devices:
-          type: array
-          items:
-            type: string
-            format: uri
           readOnly: true
-        timezone:
-          type: string
-          readOnly: true
-        devices_refs:
-          type: array
-          items:
-            type: string
-          readOnly: true
-          description: List of device refs in this fleet
-        devices_details:
-          type: object
-          additionalProperties:
-            $ref: '#/components/schemas/DeviceShortDetails'
-          readOnly: true
-          description: Detailed device information including name, id, and last data
-            timestamp
       required:
-      - devices
-      - devices_details
-      - devices_refs
       - id
       - name
-      - ref
-      - timezone
+    IotaWattSummary:
+      type: object
+      properties:
+        id:
+          type: string
+          readOnly: true
+        name:
+          type: string
+          readOnly: true
+        router:
+          allOf:
+          - $ref: '#/components/schemas/RouterReference'
+          readOnly: true
+          nullable: true
+        switchboard:
+          allOf:
+          - $ref: '#/components/schemas/SwitchBoardReference'
+          readOnly: true
+      required:
+      - id
+      - name
+      - router
+      - switchboard
     Login:
       type: object
       properties:
@@ -1987,23 +1816,9 @@ components:
           type: string
       required:
       - password
-    MetricLabel:
-      type: object
-      properties:
-        id:
-          type: integer
-          readOnly: true
-        name:
-          type: string
-          maxLength: 64
-        comment:
-          type: string
-          maxLength: 300
-        device:
-          type: integer
-      required:
-      - device
-      - id
+    NullEnum:
+      enum:
+      - null
     PasswordChange:
       type: object
       properties:
@@ -2044,146 +1859,53 @@ components:
       - new_password2
       - token
       - uid
-    PatchedDevice:
+    PatchedAction:
       type: object
       properties:
         id:
           type: integer
           readOnly: true
-        ref:
-          type: string
-          maxLength: 50
-        name:
-          type: string
-          maxLength: 200
-        title:
-          type: string
-        name_ref:
-          type: string
-          readOnly: true
-        latitude:
-          type: number
-          format: double
-        longitude:
-          type: number
-          format: double
-        owner_full_name:
-          type: string
-          readOnly: true
-          default: ''
-        site_status:
-          type: string
-        solar:
-          type: string
-          readOnly: true
-          default: Unknown
-        latest:
-          type: string
-          format: date-time
-          readOnly: true
-          nullable: true
-        latest_ago:
-          type: integer
-          description: |-
-            Return seconds since last data
-            -666 if no latest data (to distinguish from 0 and allow nice formatting in grafana)
-          readOnly: true
-          nullable: true
-        images:
-          type: array
-          items:
-            type: string
-          readOnly: true
-          description: List of image URLs for this device
-        rates:
-          $ref: '#/components/schemas/Rates'
-        metrics:
-          type: array
-          items:
-            $ref: '#/components/schemas/MetricLabel'
-          readOnly: true
-          default: []
-        videos:
-          type: array
-          items:
-            $ref: '#/components/schemas/DeviceVideo'
-          readOnly: true
-        users:
-          type: array
-          items:
-            type: integer
-          description: Each device may have many users
-        timezone:
-          type: string
-          readOnly: true
-        goodwe_site_id:
-          type: string
-        battery:
-          type: boolean
-    PatchedFleet:
-      type: object
-      properties:
-        id:
-          type: integer
-          readOnly: true
-        ref:
-          type: string
-          maxLength: 50
         name:
           type: string
           maxLength: 64
-        devices:
-          type: array
-          items:
-            type: string
-            format: uri
-          readOnly: true
-        timezone:
-          type: string
-          readOnly: true
-        devices_refs:
-          type: array
-          items:
-            type: string
-          readOnly: true
-          description: List of device refs in this fleet
-        devices_details:
-          type: object
-          additionalProperties:
-            $ref: '#/components/schemas/DeviceShortDetails'
-          readOnly: true
-          description: Detailed device information including name, id, and last data
-            timestamp
-    PatchedUser:
+        status:
+          $ref: '#/components/schemas/StatusEnum'
+    PatchedRouterUpdate:
       type: object
       properties:
-        devices:
-          type: array
-          items:
-            type: string
-          readOnly: true
-          description: List of device refs for this user
+        status:
+          type: string
+          maxLength: 64
+        notes:
+          type: string
+          maxLength: 256
+        iccid:
+          type: string
+          title: ICCID (SIM)
+          description: Integrated Circuit Card Identification Number  (18-22 digits)
+            identified the SIMM card
+          maxLength: 22
+        imei:
+          type: string
+          title: IMEI (router)
+          description: International Mobile Station Equipment (15 digits) identified
+            the router
+          maxLength: 15
+    PatchedSiteMetric:
+      type: object
+      properties:
         id:
-          type: integer
+          type: string
           readOnly: true
-        email:
+        display_name:
           type: string
-          format: email
-          maxLength: 254
-        full_name:
+          maxLength: 64
+        display_description:
           type: string
-          maxLength: 191
-        short_name:
+          maxLength: 300
+        category:
           type: string
-          maxLength: 191
-        phone:
-          type: string
-          nullable: true
-          maxLength: 128
-        password:
-          type: string
-          writeOnly: true
-          maxLength: 128
+          readOnly: true
     PatchedUserDetails:
       type: object
       description: User model w/o password
@@ -2196,40 +1918,82 @@ components:
           type: string
           format: email
           readOnly: true
-    Rates:
+    PhaseEnum:
+      enum:
+      - R
+      - W
+      - B
+      type: string
+      description: |-
+        * `R` - Red
+        * `W` - White
+        * `B` - Blue
+    PhaseRotationEnum:
+      enum:
+      - CW
+      - CCW
+      type: string
+      description: |-
+        * `CW` - Clockwise
+        * `CCW` - Counter Clockwise
+    Pole:
       type: object
       properties:
         id:
+          type: string
+          readOnly: true
+        name:
+          type: string
+          readOnly: true
+        phase:
+          allOf:
+          - $ref: '#/components/schemas/PhaseEnum'
+          description: |-
+            Phase of the pole (Red, Green, Blue, etc.)
+
+            * `R` - Red
+            * `W` - White
+            * `B` - Blue
+        current:
           type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+          description: Current in amps
+      required:
+      - id
+      - name
+    Rates:
+      type: object
+      properties:
         import_rate:
           type: number
           format: double
-          maximum: 100000000
-          minimum: -100000000
+          maximum: 10000
+          minimum: -10000
           exclusiveMaximum: true
           exclusiveMinimum: true
+          description: Cost to import energy
         export_rate:
           type: number
           format: double
-          maximum: 100000000
-          minimum: -100000000
+          maximum: 10000
+          minimum: -10000
           exclusiveMaximum: true
           exclusiveMinimum: true
+          description: Amount credited for exported energy
         service_rate:
           type: number
           format: double
-          maximum: 100000000
-          minimum: -100000000
+          maximum: 10000
+          minimum: -10000
           exclusiveMaximum: true
           exclusiveMinimum: true
+          description: Daily cost, regardless of usage
         billing_days:
           type: integer
-      required:
-      - billing_days
-      - export_rate
-      - id
-      - import_rate
-      - service_rate
+          maximum: 2147483647
+          minimum: -2147483648
+          description: Bill frequency, typically 30 (monthly) or 120 (quarterly)
     RestAuthDetail:
       type: object
       properties:
@@ -2238,6 +2002,364 @@ components:
           readOnly: true
       required:
       - detail
+    RouterCreate:
+      type: object
+      properties:
+        id:
+          type: string
+          maxLength: 50
+        site_id:
+          type: string
+          maxLength: 50
+        switchboard_id:
+          type: string
+          maxLength: 64
+        iccid:
+          type: string
+          maxLength: 22
+        imei:
+          type: string
+          maxLength: 15
+        status:
+          type: string
+          maxLength: 64
+        notes:
+          type: string
+          maxLength: 256
+      required:
+      - id
+      - site_id
+      - switchboard_id
+    RouterDetail:
+      type: object
+      properties:
+        id:
+          type: string
+          readOnly: true
+        name:
+          type: string
+          readOnly: true
+        status:
+          type: string
+          maxLength: 64
+        switchboard:
+          allOf:
+          - $ref: '#/components/schemas/SwitchBoardReference'
+          nullable: true
+          readOnly: true
+        iotawatt_count:
+          type: integer
+          readOnly: true
+        iccid:
+          type: string
+          title: ICCID (SIM)
+          description: Integrated Circuit Card Identification Number  (18-22 digits)
+            identified the SIMM card
+          maxLength: 22
+        imei:
+          type: string
+          title: IMEI (router)
+          description: International Mobile Station Equipment (15 digits) identified
+            the router
+          maxLength: 15
+        notes:
+          type: string
+          maxLength: 256
+        iotawatts:
+          type: array
+          items:
+            $ref: '#/components/schemas/IotaWattReference'
+          readOnly: true
+      required:
+      - id
+      - iotawatt_count
+      - iotawatts
+      - name
+      - switchboard
+    RouterReference:
+      type: object
+      properties:
+        id:
+          type: string
+          readOnly: true
+        name:
+          type: string
+          readOnly: true
+      required:
+      - id
+      - name
+    RouterSummary:
+      type: object
+      properties:
+        id:
+          type: string
+          readOnly: true
+        name:
+          type: string
+          readOnly: true
+        status:
+          type: string
+          maxLength: 64
+        switchboard:
+          allOf:
+          - $ref: '#/components/schemas/SwitchBoardReference'
+          nullable: true
+          readOnly: true
+        iotawatt_count:
+          type: integer
+          readOnly: true
+      required:
+      - id
+      - iotawatt_count
+      - name
+      - switchboard
+    SiteDetail:
+      type: object
+      properties:
+        id:
+          type: string
+          readOnly: true
+        name:
+          type: string
+          maxLength: 200
+        site_status:
+          type: string
+          readOnly: true
+        data_status:
+          type: string
+          readOnly: true
+        solar_status:
+          type: string
+          readOnly: true
+        last_data_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+          description: Time of the latest data, or null if the site has no data
+        client_note:
+          type: string
+          maxLength: 100
+        timezone:
+          type: string
+          readOnly: true
+        battery:
+          type: boolean
+          readOnly: true
+        location:
+          type: object
+          additionalProperties:
+            type: number
+            format: double
+          readOnly: true
+        rates:
+          allOf:
+          - $ref: '#/components/schemas/Rates'
+          readOnly: true
+        switchboards:
+          type: array
+          items:
+            $ref: '#/components/schemas/SwitchBoardSummary'
+          readOnly: true
+        metrics:
+          type: array
+          items:
+            $ref: '#/components/schemas/SiteMetric'
+          readOnly: true
+        actions:
+          type: array
+          items:
+            $ref: '#/components/schemas/ActionSummary'
+          readOnly: true
+        images:
+          type: array
+          items:
+            $ref: '#/components/schemas/ImageSummary'
+          readOnly: true
+        videos:
+          type: array
+          items:
+            $ref: '#/components/schemas/VideoSummary'
+          readOnly: true
+      required:
+      - actions
+      - battery
+      - data_status
+      - id
+      - images
+      - last_data_at
+      - location
+      - metrics
+      - name
+      - rates
+      - site_status
+      - solar_status
+      - switchboards
+      - timezone
+      - videos
+    SiteMetric:
+      type: object
+      properties:
+        id:
+          type: string
+          readOnly: true
+        display_name:
+          type: string
+          maxLength: 64
+        display_description:
+          type: string
+          maxLength: 300
+        category:
+          type: string
+          readOnly: true
+      required:
+      - category
+      - id
+    SiteMetricCreate:
+      type: object
+      description: Accept the public metric ID while keeping its derived category
+        read-only.
+      properties:
+        id:
+          type: string
+        display_name:
+          type: string
+          maxLength: 64
+        display_description:
+          type: string
+          maxLength: 300
+      required:
+      - id
+    SiteSummary:
+      type: object
+      properties:
+        id:
+          type: string
+          readOnly: true
+        name:
+          type: string
+          maxLength: 200
+        site_status:
+          type: string
+          readOnly: true
+        data_status:
+          type: string
+          readOnly: true
+        solar_status:
+          type: string
+          readOnly: true
+        last_data_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+          description: Time of the latest data, or null if the site has no data
+        client_note:
+          type: string
+          maxLength: 100
+      required:
+      - data_status
+      - id
+      - last_data_at
+      - name
+      - site_status
+      - solar_status
+    StatusEnum:
+      enum:
+      - PENDING
+      - IN_PROGRESS
+      - COMPLETED
+      - CANCELLED
+      type: string
+      description: |-
+        * `PENDING` - Pending
+        * `IN_PROGRESS` - In Progress
+        * `COMPLETED` - Completed
+        * `CANCELLED` - Cancelled
+    SwitchBoardDetail:
+      type: object
+      properties:
+        id:
+          type: string
+          readOnly: true
+        name:
+          type: string
+          readOnly: true
+        description:
+          type: string
+          maxLength: 256
+        contains_router:
+          allOf:
+          - $ref: '#/components/schemas/RouterReference'
+          readOnly: true
+          nullable: true
+        iotawatts:
+          type: array
+          items:
+            $ref: '#/components/schemas/IotaWattReference'
+          readOnly: true
+        poles:
+          type: array
+          items:
+            $ref: '#/components/schemas/Pole'
+          readOnly: true
+      required:
+      - contains_router
+      - id
+      - iotawatts
+      - name
+      - poles
+    SwitchBoardReference:
+      type: object
+      properties:
+        site_id:
+          type: string
+          readOnly: true
+        id:
+          type: string
+          readOnly: true
+        name:
+          type: string
+          readOnly: true
+      required:
+      - id
+      - name
+      - site_id
+    SwitchBoardSummary:
+      type: object
+      properties:
+        id:
+          type: string
+          readOnly: true
+        name:
+          type: string
+          readOnly: true
+        description:
+          type: string
+          maxLength: 256
+        contains_router:
+          allOf:
+          - $ref: '#/components/schemas/RouterReference'
+          readOnly: true
+          nullable: true
+        iotawatt_count:
+          type: integer
+          readOnly: true
+        iotawatts:
+          type: array
+          items:
+            $ref: '#/components/schemas/IotaWattReference'
+          readOnly: true
+        pole_count:
+          type: integer
+          readOnly: true
+      required:
+      - contains_router
+      - id
+      - iotawatt_count
+      - iotawatts
+      - name
+      - pole_count
     Token:
       type: object
       description: Serializer for Token model.
@@ -2247,40 +2369,6 @@ components:
           maxLength: 40
       required:
       - key
-    User:
-      type: object
-      properties:
-        devices:
-          type: array
-          items:
-            type: string
-          readOnly: true
-          description: List of device refs for this user
-        id:
-          type: integer
-          readOnly: true
-        email:
-          type: string
-          format: email
-          maxLength: 254
-        full_name:
-          type: string
-          maxLength: 191
-        short_name:
-          type: string
-          maxLength: 191
-        phone:
-          type: string
-          nullable: true
-          maxLength: 128
-        password:
-          type: string
-          writeOnly: true
-          maxLength: 128
-      required:
-      - devices
-      - email
-      - id
     UserDetails:
       type: object
       description: User model w/o password
@@ -2296,6 +2384,68 @@ components:
       required:
       - email
       - pk
+    VideoSummary:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+          maxLength: 64
+      required:
+      - id
+      - name
+    VtModelEnum:
+      enum:
+      - Jameco/112336
+      - JW-95001-NA
+      - Ideal 77DE-06-09(EU)
+      - Ideal 77DB-06-09(UK)
+      - TDC DA-10-09-E6
+      - Jameco/2270815
+      - M9233
+      - DCSS AC910(Aus)
+      - Powertech MP-3027(Aus)
+      - Ideal 77DE-06-09-V(EU)
+      - Ideal 77DE-06-09-VI(EU)
+      - Ideal 77DA-10-09-MI(USA)
+      - TDC DE-10-09(EU)
+      - Jameco/100061
+      - Jameco/102234
+      - Jameco/2227444
+      - CUI 41A-9-1000
+      - AX-27750-H
+      - TDC DA-10-09
+      - generic120V
+      - generic240V
+      - PowerTrans12V(Aus)
+      - PowerTrans9V(Aus)
+      type: string
+      description: |-
+        * `Jameco/112336` - Jameco/112336
+        * `JW-95001-NA` - JW-95001-NA
+        * `Ideal 77DE-06-09(EU)` - Ideal 77DE-06-09(EU)
+        * `Ideal 77DB-06-09(UK)` - Ideal 77DB-06-09(UK)
+        * `TDC DA-10-09-E6` - TDC DA-10-09-E6
+        * `Jameco/2270815` - Jameco/2270815
+        * `M9233` - M9233
+        * `DCSS AC910(Aus)` - DCSS AC910(Aus)
+        * `Powertech MP-3027(Aus)` - Powertech MP-3027(Aus)
+        * `Ideal 77DE-06-09-V(EU)` - Ideal 77DE-06-09-V(EU)
+        * `Ideal 77DE-06-09-VI(EU)` - Ideal 77DE-06-09-VI(EU)
+        * `Ideal 77DA-10-09-MI(USA)` - Ideal 77DA-10-09-MI(USA)
+        * `TDC DE-10-09(EU)` - TDC DE-10-09(EU)
+        * `Jameco/100061` - Jameco/100061
+        * `Jameco/102234` - Jameco/102234
+        * `Jameco/2227444` - Jameco/2227444
+        * `CUI 41A-9-1000` - CUI 41A-9-1000
+        * `AX-27750-H` - AX-27750-H
+        * `TDC DA-10-09` - TDC DA-10-09
+        * `generic120V` - generic120V
+        * `generic240V` - generic240V
+        * `PowerTrans12V(Aus)` - PowerTrans12V(Aus)
+        * `PowerTrans9V(Aus)` - PowerTrans9V(Aus)
   securitySchemes:
     cookieAuth:
       type: apiKey

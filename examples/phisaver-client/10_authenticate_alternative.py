@@ -1,3 +1,8 @@
+"""
+Authenticate with hard-coded credentials (not recommended!)
+
+Prefer environment variables; see 01_authenticate.py.
+"""
 
 from phisaver_client.helpers import get_client
 
@@ -6,15 +11,14 @@ url = "https://app.phisaver.com/"
 username = "username@example.com"
 password = "your_password"
 
-try:    
+try:
     client = get_client(
-    base_url=url,
-    username=username,
-    password=password,
-    verify_ssl=True,  # Set to False if testing locally
-)
+        base_url=url,
+        username=username,
+        password=password,
+        verify_ssl=True,  # Set to False if testing locally with a self-signed certificate
+    )
     print("Authenticated using hard-coded variables!")
 except Exception as e:
     print(f"Authentication failed: {e}")
     print("Check the hard-coded credentials in the script.")
-

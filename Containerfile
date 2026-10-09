@@ -17,6 +17,7 @@ COPY .env.example .env
 COPY examples/ examples/
 COPY schema.yml schema.yml
 COPY README.md README.md
+COPY CHEATSHEET.md CHEATSHEET.md
 
 # Install Python packages
 ARG PYPI_INDEX=https://test.pypi.org/simple/
@@ -26,7 +27,7 @@ RUN pip install --no-cache-dir \
     --quiet \
     --index-url ${PYPI_INDEX} \
     --extra-index-url https://pypi.org/simple/ \
-    phisaver-client httpx httpie
+    "phisaver-client>=2.1" httpx httpie
 
 # Auto-source .env on shell startup
 RUN echo 'set -a && source /workspace/.env && set +a' >> /root/.bashrc

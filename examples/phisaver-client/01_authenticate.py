@@ -1,19 +1,19 @@
 """
 Authenticate with the PhiSaver API
 
-This example shows different ways to authenticate with the PhiSaver API.
+This example shows how to get an authenticated client from environment variables.
 Get demo credentials at https://phisaver.com
 """
 
 import os
 
-from phisaver_client.helpers import get_client, get_client_from_env
+from phisaver_client.helpers import get_client_from_env
 
-# Method 1: Using environment variables (recommended over hardcoding)
+# Using environment variables (recommended over hardcoding)
 # Set these in your environment (e.g., in your shell or .env file):
-# PHISAVER_URL=https://app.phisaver.com
-# PHISAVER_USERNAME=demo@example.com
-# PHISAVER_PASSWORD=your_password
+# PS_API_URL=https://app.phisaver.com
+# PS_API_USERNAME=demo@phisaver.com
+# PS_API_PASSWORD=your_password
 
 try:
     client = get_client_from_env()
@@ -21,6 +21,7 @@ try:
 except Exception as e:
     print(f"Authentication failed: {e}")
     print("Used the following environment variables:")
-    print(f"PHISAVER_URL={os.getenv('PHISAVER_URL')}")
-    print(f"PHISAVER_USERNAME={os.getenv('PHISAVER_USERNAME')}")
-    print(f"PHISAVER_PASSWORD={'*' * len(os.getenv('PHISAVER_PASSWORD', ''))}")
+    print(f"PS_API_URL={os.getenv('PS_API_URL')}")
+    print(f"PS_API_USERNAME={os.getenv('PS_API_USERNAME')}")
+    print(f"PS_API_PASSWORD={'*' * len(os.getenv('PS_API_PASSWORD', ''))}")
+    raise SystemExit(1)

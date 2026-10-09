@@ -5,97 +5,102 @@ This example shows how to:
 - Get time-series data for specific metrics (e.g., Production, Consumption)
 - Specify time ranges and binning intervals
 - Access data in both series and table formats
-- Handle multiple metrics and error responses
+- Query metrics by category
+- Handle error responses
+
+Note: list-like parameters (sites, mets) are ONE comma-separated string,
+e.g. mets="Consumption,Production". Do not pass a Python list.
 """
 
-from datetime import datetime
 import pprint
-from zoneinfo import ZoneInfo
+from datetime import datetime, timedelta
 
-from phisaver_client.api.ts.ts_series_retrieve import sync_detailed as get_ts_series_detailed
-from phisaver_client.api.ts.ts_table_retrieve import sync_detailed as get_ts_table_detailed
+from phisaver_client import errors
+from phisaver_client.api.sites.sites_list import sync as get_sites
+from phisaver_client.api.sites.sites_metrics_list import sync as get_metrics
+from phisaver_client.api.ts.ts_series_retrieve import sync as get_ts_series
+from phisaver_client.api.ts.ts_table_retrieve import sync as get_ts_table
 from phisaver_client.helpers import get_client_from_env
 
-# Authenticate
+# Authenticate. Any error response raises errors.UnexpectedStatus (see Example 4).
 client = get_client_from_env()
 
-# Define time range and timezone
-AEST = ZoneInfo("Australia/Brisbane")
-start_date = datetime(2025, 1, 1, tzinfo=AEST)
-end_date = datetime(2025, 1, 7, tzinfo=AEST)
+# Pick sites to query. Prefer a site with configured metrics
+# (needed for metcat queries), plus a second site for the multi-site table.
+sites = get_sites(client=client)
+if not sites:
+    raise SystemExit("No sites available for this account")
+site = next((s for s in sites if get_metrics(s.id, client=client)), sites[0])
+site_id = site.id
+site_ids = [site_id] + [s.id for s in sites if s.id != site_id][:1]
 
-# Example 1: Get time series data for Production
-series = get_ts_series_detailed(
-    sites=["demo1"],  # Replace with actual device ref
+# Time range: the 30 days before the site's latest data
+# last_data_at is None if the site has never reported data
+end_date = site.last_data_at or datetime.now().astimezone()
+start_date = end_date - timedelta(days=30)
+print(f"Querying {site_ids} from {start_date.isoformat()} to {end_date.isoformat()}")
+
+# Example 1: Get time series data for two metrics
+series = get_ts_series(
     client=client,
+    sites=site_id,
     start=start_date,
     stop=end_date,
     bin_="1d",  # Daily bins: 1d, 1h, 15min, etc.
-    mets=["Consumption","Production"],  # Metrics: Production, Consumption, etc.
-    units="W",  # Units: W, Wh, kWh
+    mets="Consumption,Production",  # Metrics: Production, Consumption, Net, etc.
+    units="W",  # Units: W, kW, kWh/day, $/day
 )
 
-# series contains raw and parsed data. 
-# Use series.parsed for easy access.
-if series.parsed:
-    print("\nProduction data retrieved:") 
-    pprint.pprint(series.parsed['demo1'], indent=4)
+# series[site][metric] -> [[timestamp, value], ...]
+print("\nSeries data retrieved:")
+pprint.pprint(series[site_id].to_dict(), indent=4)
 
-
-
-    
-# Example 2: Get data in table format (easier for analysis)
+# Example 2: Get data in table format (one value per metric; easier for analysis)
 print("\n" + "=" * 60)
 print("Fetching multiple sites with data in table format...")
-table = get_ts_table_detailed(
-    sites=["demo1","demo2"],  # Multiple devices
+table = get_ts_table(
     client=client,
+    sites=",".join(site_ids),  # Multiple sites
     start=start_date,
     stop=end_date,
     units="kWh/day",
 )
 
-if table.parsed:
-    print("\nTable data retrieved:")
-    for site in table.parsed.additional_keys:
-        print(f"  Site: {site}")
-        pprint.pprint(table.parsed[site], indent=4)
-    
-# Example 3: Get multiple metrics
+print("\nTable data retrieved:")
+for site in table.additional_keys:
+    print(f"  Site: {site}")
+    pprint.pprint(table[site].to_dict(), indent=4)
+
+# Example 3: Get all metrics in a category
 print("\n" + "=" * 60)
-
-multi_series = get_ts_series_detailed(
-    sites=["demo1"],
+multi_series = get_ts_series(
     client=client,
+    sites=site_id,
     start=start_date,
     stop=end_date,
-    bin_="1d",  
-    metcat=["load"], 
+    bin_="1d",
+    metcat="load",  # Category: load, production, battery, net, calc, other, all
     units="kWh/day",
 )
 
-if multi_series.parsed:
-    print("\nMultiple metrics data retrieved:")
-    pprint.pprint(multi_series.parsed['demo1'], indent=4)
-else:
-    print("No data retrieved: ", multi_series)
-        
+print("\nMetrics by category retrieved:")
+pprint.pprint(multi_series[site_id].to_dict(), indent=4)
+
 # Example 4: View the error
 print("\n" + "=" * 60)
 print("Attempting to fetch data with invalid parameters...")
-invalid_series = get_ts_series_detailed(
-    sites=["demo1"],
-    client=client,
-    start=start_date,
-    stop=end_date,
-    bin_="1h",  
-    metcat=["InvalidMetric"],  # Invalid metric
-    units="W",
-)
-if invalid_series.parsed:
+try:
+    get_ts_series(
+        client=client,
+        sites=site_id,
+        start=start_date,
+        stop=end_date,
+        bin_="1h",
+        metcat="InvalidMetric",  # Invalid metric category
+        units="W",
+    )
     print("Data retrieved (unexpected!)")
-else:
+except errors.UnexpectedStatus as e:
     print("OK: the expected error occurred.")
-    # View the response by uncommenting the line below.")
-    # pprint.pprint(invalid_series)     
-    
+    print(f"Status: {e.status_code}")
+    print(e.content.decode())  # Names the invalid parameters

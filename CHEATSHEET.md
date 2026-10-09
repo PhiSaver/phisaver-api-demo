@@ -1,28 +1,64 @@
 # PhiSaver API Cheat Sheet
 
-Cheatsheet for PhiSaver API query parameters and usage patterns.
+Cheatsheet for PhiSaver API (v2) query parameters and usage patterns.
 
 ## Endpoints
 
-### Time-Series Data
-- **`/api/v1/ts/series/`** - Returns time-series data with timestamps
-- **`/api/v1/ts/table/`** - Returns aggregated data without timestamps
-
-### Device Management
-- **`/api/v1/devices/`** - List all devices
-- **`/api/v1/devices/{ref}/`** - Get specific device details
-
 ### Authentication
-- **`/api/v1/login/`** - Authenticate and get API token
 
-## Common Parameters
+- **`POST /api/v2/token/`** - Exchange `username` and `password` (form-encoded) for `{"token": ...}`. Send `Authorization: Token <token>` on every request.
+- **`POST /api/v2/login/`** - Session login (`email` + `password`), e.g. for HTTPie sessions
+
+### Time-Series Data
+
+- **`/api/v2/ts/series/`** - Returns time-series data with timestamps: `{site: {metric: [[timestamp, value], ...]}}`
+- **`/api/v2/ts/table/`** - Returns aggregated data without timestamps: `{site: {metric: value}}`
+- **`/api/v2/ts/heatmap/`** - Returns hourly heatmap points for ONE site: `{site: {metric: [[day_of_year, hour, watts], ...]}}`
+
+### Sites
+
+- **`/api/v2/sites/`** - List all sites you can access
+- **`/api/v2/sites/{id}/`** - Get specific site details
+- **`/api/v2/sites/{site_id}/metrics/`** - Measured circuits at a site (calculated metrics such as `Consumption` are not listed)
+- **`/api/v2/sites/{site_id}/metrics/{id}/`** - One metric
+- **`/api/v2/sites/{site_id}/switchboards/`** - Switchboards at a site, each with its IoTaWatts
+- **`/api/v2/sites/{site_id}/switchboards/{id}/`** - One switchboard, with its IoTaWatts and poles
+- **`/api/v2/sites/{site_id}/switchboards/{switchboard_id}/poles/`** - Poles (circuit breakers) in a switchboard
+- **`/api/v2/sites/{site_id}/iotawatts/`** - IoTaWatts at a site (404 if you cannot see the site)
+
+### Fleets
+
+- **`/api/v2/fleets/`** - List fleets (named groups of sites)
+- **`/api/v2/fleets/{id}/`** - Fleet details, including its sites
+
+### IoTaWatts
+
+- **`/api/v2/iotawatts/`** - List IoTaWatt energy monitors. `site=demo1,demo2` limits the list to those sites
+- **`/api/v2/iotawatts/{id}/`** - IoTaWatt details: CTs, voltage reference, phases
+
+## List Filters
+
+Every list endpoint (sites, fleets, IoTaWatts, metrics, switchboards, poles) accepts `id`: one id or comma-separated ids, e.g. `id=demo1,demo2`.
+
+`/api/v2/iotawatts/` also accepts `site`: one site id or comma-separated site ids.
+
+`/api/v2/sites/` also accepts the filters below. Each takes a single value or comma-separated values.
+
+- `name_prefix` - Case-insensitive site name prefix
+- `data_status` - `Active`, `RecentlyInactive`, `Inactive`, `NotStarted`, `Unknown`
+- `solar_status` - `Active`, `SubOptimal`, `Inactive`, `NotPresent`, `Unknown`
+
+## Common Time-Series Parameters
+
+**List parameters (`sites`, `mets`) take ONE comma-separated value.** A repeated parameter (`mets=A&mets=B`) is rejected with 400.
 
 ### Required Parameters
 
-#### `start` (string)
-Start time for the query (inclusive).
+#### `start` (string) - or `duration`
+Start time for the query (inclusive). Either `start` or `duration` is required.
 
 **Formats:**
+
 - ISO8601 with timezone: `2025-01-01T00:00:00+10:00`
 - ISO8601 UTC: `2025-01-01T00:00:00Z`
 - Epoch seconds: `1735668000`
@@ -34,24 +70,29 @@ start="2025-01-01T00:00:00Z"          # ISO8601 UTC
 start=1735668000                      # Epoch seconds
 ```
 
-#### `stop` (string) OR `duration` (string)
-End time for the query (exclusive) OR duration from start.
+#### `stop` (string)
+End time for the query (exclusive). Defaults to now. Same formats as `start`.
 
-**Formats:**
-- Same as `start` for `stop`
-- Pandas timedelta for `duration`: `7d`, `24h`, `1W`, `1ME`
+```bash
+stop="2025-01-07T00:00:00+10:00"     # ISO8601
+```
+
+#### `duration` (string) - instead of `start`
+Length of the query, ending at `stop` (or now). Do not combine with `start`.
+
+**Formats:** pandas timedelta or plain seconds: `7d`, `24h`, `3600`
 
 **Examples:**
 ```bash
-stop="2025-01-07T00:00:00+10:00"     # ISO8601
-duration=7d                           # 7 days from start
-duration=24h                          # 24 hours from start
+duration=7d                                       # last 7 days
+duration=24h stop="2025-01-07T00:00:00+10:00"     # 24 hours before stop
 ```
 
-#### `bin` (string) - Only for `/ts/series/`
+#### `bin` (string) - Required for `/ts/series/` only
 Time interval for grouping data points.
 
 **Valid values:**
+
 - `1min`, `5min`, `15min`, `30min` - Minutes
 - `1h`, `2h`, `6h`, `12h` - Hours  
 - `1d` - Daily
@@ -70,21 +111,29 @@ bin=1ME     # Monthly bins (month-end)
 ### Site Selection
 
 #### `sites` (string)
-Comma-separated list of device identifiers.
+Comma-separated list of site ids (the `id` field from `/api/v2/sites/`).
 
 **Examples:**
 ```bash
-sites=demo1                    # Single device
-sites=demo1,demo2              # Multiple devices
-sites=demo1,demo2,demo3        # Three devices
+sites=demo1                    # Single site
+sites=demo1,demo2              # Multiple sites
+sites=demo1,demo2,demo3        # Three sites
+```
+
+#### `fleet` (string)
+A fleet id, used instead of `sites`. Equivalent to listing every site in the fleet.
+
+```bash
+fleet=myfleet
 ```
 
 ### Metric Selection
 
 #### `mets` (string)
-Comma-separated list of metric/circuit names.
+Comma-separated list of metric/circuit names. A site's metrics are listed at `/api/v2/sites/{id}/metrics/`.
 
 **Common metrics:**
+
 - `Production` - Solar production
 - `Consumption` - Total consumption
 - `Import` - Import from grid (unsigned)
@@ -103,74 +152,72 @@ mets=Production,Consumption,Export     # Three metrics
 Filter metrics by category instead of naming them explicitly.
 
 **Valid values:**
-- `load` - All consumption circuits
-- `production` - All solar/generation circuits
-- `battery` - All battery circuits
-- `net` - Grid import/export
-- `calc` - Calculated metrics
+
+- `load` - All consumption circuits (every metric not listed below)
+- `production` - Solar: `Production`
+- `battery` - `Battery`, `BatteryCharge`, `BatteryDischarge`
+- `net` - Grid: `Net`, `Import`, `Export`
+- `calc` - Calculated: `Consumption`, `FreeConsumption`, `ImportConsumption`, `Unmonitored`
 - `other` - Other circuits
+- `all` - Every metric
+
+Each metric belongs to exactly one category.
 
 **Example:**
 ```bash
-metcat=production              # All production metrics
+metcat=net                     # Net, Import, Export
 metcat=load                    # All load/consumption metrics
 ```
 
 ### Units and Attributes
 
 #### `units` (string)
-Units of measurement. Valid values depend on endpoint and attribute.
+Units of measurement. Valid values: `W`, `kW`, `kWh/day`, `$/day`. Heatmap accepts `W` only.
 
 **For `/ts/series/`: average value across the bin interval**
+
 - `W` (recommended) - Watts
 - `kW` - Kilowatts
 
 
 **For `/ts/table/` (aggregated values):**
+
 - `kWh/day` (recommended) - Kilowatt-hours per day
 - `$/day` - Dollars per day
 
 **Examples:**
 ```bash
 # Time-series with kilowatts
-/api/v1/ts/series/ ... units=kW
+/api/v2/ts/series/ ... units=kW
 
 # Daily totals in kWh/day
-/api/v1/ts/table/ ... units=kWh/day
+/api/v2/ts/table/ ... units=kWh/day
 ```
 
 #### `attribute` (string)
-Physical attribute to query. Default is `power`. Other units not yet tested.
+Physical attribute to query. Default is `power`. Other attributes are not yet fully tested.
 
 **Valid values:**
+
 - `power` (default) - Power measurements
 - `voltage` - Voltage measurements (beta)
 - `current` - Current measurements (beta)
 - `pf` - Power factor (beta)
 - `soc` - State of charge (batteries) (beta)
+- `status` - Status values (beta)
 
 
 
 
 ### Output Format
 
-#### `format` (string)
-Response format.
-
-**Valid values:**
-- `json` (default) - JSON response
-- `csv` - CSV download
-
-**Example:**
-```bash
-format=json                    # JSON (default)
-format=csv                     # CSV file
-```
+Responses are JSON. (v1's `format=csv` is not available in v2.)
 
 #### `timeformat` (string)
 Timestamp format in response.
 
 **Valid values:**
+
 - `iso` (default) - ISO8601 strings
 - `epoch` - Unix timestamp (seconds)
 - `epochms` - Unix timestamp (milliseconds)
@@ -188,6 +235,7 @@ timeformat=epochms             # 1735668000000
 IANA timezone string for the query. Defaults to the first site's timezone.
 
 **Common timezones:**
+
 - `Australia/Brisbane` - AEST (no DST)
 - `Australia/Sydney` - AEST/AEDT (with DST)
 - `Australia/Perth` - AWST
@@ -201,19 +249,8 @@ timezone=UTC
 
 ### Aggregation
 
-#### `function` (string)
-Aggregation function for binning. Default is `mean`.
-
-**Valid values:**
-- `mean` (default) - Average value
-- `sum` - Sum of values (beta)
-- `max` - Maximum value (beta)
-
-**Example:**
-```bash
-function=mean                  # Average (default)
-function=sum                   # Sum values
-```
+#### `function` (string) - `/ts/series/` and `/ts/table/`
+Aggregation function for binning. Only `mean` (the default) is currently accepted.
 
 ### Data Source
 
@@ -221,9 +258,11 @@ function=sum                   # Sum values
 Data source to query. Default is `iotawatt`.
 
 **Valid values:**
+
 - `iotawatt` (default) - IoTaWatt energy monitor
 - `inverter` - Solar inverter data (beta)
 - `nem` - National Electricity Market data (beta)
+- `calc` - Calculated data (beta)
 
 **Example:**
 ```bash
@@ -235,6 +274,7 @@ source=inverter                # Inverter data
 Database engine to use. Default is `influx`.
 
 **Valid values:**
+
 - `influx` (default) - InfluxDB
 - `timescale` - TimescaleDB (beta)
 
@@ -242,7 +282,7 @@ Database engine to use. Default is `influx`.
 ### Other Options
 
 #### `named` (boolean)
-Convert site references to human-readable names. Default is `false`.
+Convert site ids to human-readable names in the response. Default is `false`.
 
 **Example:**
 ```bash
@@ -251,7 +291,7 @@ named=true                     # Convert 'demo1' to 'Demo Device 01'
 
 ## More Information
 
-- [HTTPie Examples](httpie/README.md) - Command-line examples
-- [Python httpx Examples](httpx/) - Python HTTP client examples  
-- [phisaver-client Examples](phisaver-client/) - Generated client library examples
-- [OpenAPI Schema](../schema.yml) - Full API specification
+- [HTTPie Examples](examples/httpie/README.md) - Command-line examples
+- [Python httpx Examples](examples/httpx/) - Python HTTP client examples  
+- [phisaver-client Examples](examples/phisaver-client/) - Generated client library examples
+- [OpenAPI Schema](schema.yml) - Full API specification

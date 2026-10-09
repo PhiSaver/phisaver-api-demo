@@ -51,21 +51,21 @@ test-httpie: build  ## Test HTTPie authentication
 	@$(RUNTIME) run --replace --name $(CONTAINER_NAME) -it \
 		-v $(PWD):/workspace \
 		$(IMAGE_NAME) \
-		bash -c 'set -a && source .env && set +a && http --ignore-stdin POST $$PHISAVER_URL/api/v1/login/ email=$$PHISAVER_USERNAME password=$$PHISAVER_PASSWORD'
+		bash -c 'set -a && source .env && set +a && http --ignore-stdin -f POST $$PS_API_URL/api/v2/token/ username=$$PS_API_USERNAME password=$$PS_API_PASSWORD'
 
-test-httpx: build  ## Test httpx example
+test-httpx: build  ## Run all httpx examples
 	@echo "Testing httpx example..."
 	@$(RUNTIME) run --replace --name $(CONTAINER_NAME) -it \
 		-v $(PWD):/workspace \
 		$(IMAGE_NAME) \
-		bash -c 'set -a && source .env && set +a && python examples/httpx/03_get_energy_data.py'
+		bash -c 'set -a && source .env && set +a && for f in examples/httpx/0*.py; do echo "== $$f"; python $$f || exit 1; done'
 
-test-client: build  ## Test phisaver-client example
+test-client: build  ## Run all phisaver-client examples
 	@echo "Testing phisaver-client example..."
 	@$(RUNTIME) run --replace --name $(CONTAINER_NAME) -it \
 		-v $(PWD):/workspace \
 		$(IMAGE_NAME) \
-		bash -c 'set -a && source .env && set +a && python examples/phisaver-client/03_get_energy_data.py'
+		bash -c 'set -a && source .env && set +a && for f in examples/phisaver-client/0*.py; do echo "== $$f"; python $$f || exit 1; done'
 
 test-all: test-httpie test-httpx test-client  ## Run all tests
 

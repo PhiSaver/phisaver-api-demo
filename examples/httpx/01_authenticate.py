@@ -1,35 +1,37 @@
 """
 Authenticate with the PhiSaver API using httpx
 
-This example shows how to authenticate and get an auth token using raw httpx.
+This example shows how to exchange a username and password for an API token.
 Get demo credentials at https://phisaver.com
 """
 
 import os
+import sys
+
 import httpx
 
 # Load credentials from environment
-base_url = os.getenv("PHISAVER_URL", "https://app.phisaver.com")
-username = os.getenv("PHISAVER_USERNAME")
-password = os.getenv("PHISAVER_PASSWORD")
+base_url = os.getenv("PS_API_URL", "https://app.phisaver.com").rstrip("/")
+username = os.getenv("PS_API_USERNAME")
+password = os.getenv("PS_API_PASSWORD")
 
 if not username or not password:
-    print("Error: Set PHISAVER_USERNAME and PHISAVER_PASSWORD environment variables")
-    exit(1)
+    print("Error: Set PS_API_USERNAME and PS_API_PASSWORD environment variables")
+    sys.exit(1)
 
-# Authenticate
-auth_url = f"{base_url}/api/v1/login/"
+# Authenticate: POST username/password (form-encoded) to /api/v2/token/
 response = httpx.post(
-    auth_url,
-    json={"email": username, "password": password},
+    f"{base_url}/api/v2/token/",
+    data={"username": username, "password": password},
 )
 
 if response.status_code == 200:
-    token = response.json()["key"]
+    token = response.json()["token"]
     print("Authentication successful!")
-    print(f"Token: {token[:20]}...")
-    print(f"\nUse this token in subsequent requests:")
-    print(f'  headers = {{"Authorization": "Token {token}"}}')
+    print(f"Token: {token[:8]}...")
+    print("\nUse this token in subsequent requests:")
+    print('  headers = {"Authorization": "Token <token>"}')
 else:
     print(f"Authentication failed: {response.status_code}")
     print(response.text)
+    sys.exit(1)
