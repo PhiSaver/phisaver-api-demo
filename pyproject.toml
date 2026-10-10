@@ -1,0 +1,22 @@
+[tool.ruff]
+line-length = 120  # matches the phisaver repo
+
+[tool.ruff.lint]
+select = ["ALL"]
+ignore = [
+    "T201",    # print: examples print their results
+    "T203",    # pprint: as above
+    "INP001",  # implicit namespace package: examples are standalone scripts
+    "CPY001",  # copyright notice in every file
+    "D203",    # one-blank-line-before-class: conflicts with D211
+    "D212",    # summary on first line: docstrings start on the second line (D213)
+    "D400",    # summary ends with period: summaries are titles
+    "D415",    # summary ends with punctuation: as above
+    "COM812",  # trailing comma: conflicts with ruff format
+    "TRY003",  # long exception message: fine for SystemExit("...") in scripts
+    "EM101",   # literal exception message: as above
+    "ERA001",  # commented-out code: false positives on "VAR=value" comments
+]
+
+[tool.ruff.lint.per-file-ignores]
+"examples/phisaver-client/10_authenticate_alternative.py" = ["S105"]  # placeholder password, on purpose

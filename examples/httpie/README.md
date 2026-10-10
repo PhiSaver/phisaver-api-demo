@@ -36,6 +36,7 @@ http -f POST $PS_API_URL/api/v2/token/ \
 ```
 
 **Expected response:**
+
 ```json
 {
     "token": "abc123def456..."
@@ -43,6 +44,7 @@ http -f POST $PS_API_URL/api/v2/token/ \
 ```
 
 **Save the token:**
+
 ```bash
 export TOKEN=$(http -f POST $PS_API_URL/api/v2/token/ \
   username="$PS_API_USERNAME" \
@@ -82,6 +84,7 @@ http GET $PS_API_URL/api/v2/sites/ \
 Each site has an `id` (e.g. `demo1`) - use it in `sites==` for time-series queries.
 
 **Filter sites** (comma-separated values are accepted):
+
 ```bash
 http GET $PS_API_URL/api/v2/sites/ \
   "Authorization:Token $TOKEN" \
@@ -92,6 +95,7 @@ http GET $PS_API_URL/api/v2/sites/ \
 Status values: `data_status` is one of `Active`, `RecentlyInactive`, `Inactive`, `NotStarted`, `Unknown`; `solar_status` is one of `Active`, `SubOptimal`, `Inactive`, `NotPresent`, `Unknown`.
 
 **Get a specific site** (rates, location, metrics, switchboards, images):
+
 ```bash
 http GET $PS_API_URL/api/v2/sites/demo1/ \
   "Authorization:Token $TOKEN"
@@ -100,6 +104,7 @@ http GET $PS_API_URL/api/v2/sites/demo1/ \
 ## 03. Get Energy Data
 
 This section demonstrates:
+
 - Getting time-series data for specific metrics
 - Using different binning intervals and time ranges
 - Accessing data in table format for analysis
@@ -229,12 +234,14 @@ http GET $PS_API_URL/api/v2/fleets/ "Authorization:Token $TOKEN" id==myfleet
 ## Tips
 
 **Save response to file:**
+
 ```bash
 http GET $PS_API_URL/api/v2/sites/ \
   "Authorization:Token $TOKEN" > sites.json
 ```
 
 **Epoch timestamps** (easier for plotting/spreadsheets):
+
 ```bash
 http GET $PS_API_URL/api/v2/ts/series/ \
   "Authorization:Token $TOKEN" \
@@ -247,6 +254,7 @@ http GET $PS_API_URL/api/v2/ts/series/ \
 ```
 
 **Verbose output (see request headers):**
+
 ```bash
 http -v GET $PS_API_URL/api/v2/sites/ \
   "Authorization:Token $TOKEN"
@@ -259,7 +267,7 @@ Common parameters for `/ts/series/`, `/ts/table/` and `/ts/heatmap/`:
 - `sites` - Comma-separated site ids (e.g., `demo1,demo2`), or `fleet` - a fleet id
 - `start` - Start time (ISO8601 with timezone, or epoch seconds)
 - `stop` - Stop time (default now)
-- `duration` - Instead of `start`: length ending at `stop` (e.g. `7d`, `24h`)
+- `duration` - Window length (e.g. `7d`, `24h`): from `start`, or ending at `stop` (default now)
 - `bin` - Bin duration (`1h`, `30min`, `1d`, `1ME`) - `/ts/series/` only, required
 - `mets` - Comma-separated metric names (`Production`, `Consumption`, `Net`), or `metcat` - a category
 - `units` - Units (`W`, `kW`, `kWh/day`, `$/day`; heatmap is `W` only)

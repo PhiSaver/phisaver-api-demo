@@ -7,6 +7,7 @@ Get demo credentials at https://phisaver.com
 
 import os
 
+import httpx
 from phisaver_client.helpers import get_client_from_env
 
 # Using environment variables (recommended over hardcoding)
@@ -18,10 +19,10 @@ from phisaver_client.helpers import get_client_from_env
 try:
     client = get_client_from_env()
     print("Authenticated using environment variables!")
-except Exception as e:
+except (KeyError, httpx.HTTPError) as e:  # missing env var, or HTTP failure
     print(f"Authentication failed: {e}")
     print("Used the following environment variables:")
     print(f"PS_API_URL={os.getenv('PS_API_URL')}")
     print(f"PS_API_USERNAME={os.getenv('PS_API_USERNAME')}")
     print(f"PS_API_PASSWORD={'*' * len(os.getenv('PS_API_PASSWORD', ''))}")
-    raise SystemExit(1)
+    raise SystemExit(1) from None

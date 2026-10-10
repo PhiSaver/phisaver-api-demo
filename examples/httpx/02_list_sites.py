@@ -24,7 +24,7 @@ if not username or not password:
 
 # Step 1: Authenticate and create a client that sends the token on every request
 auth_response = httpx.post(f"{base_url}/api/v2/token/", data={"username": username, "password": password})
-if auth_response.status_code != 200:
+if auth_response.status_code != httpx.codes.OK:
     print(f"Authentication failed: {auth_response.status_code}")
     print(auth_response.text)
     sys.exit(1)

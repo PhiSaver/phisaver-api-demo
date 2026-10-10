@@ -13,7 +13,7 @@ Cheatsheet for PhiSaver API (v2) query parameters and usage patterns.
 
 - **`/api/v2/ts/series/`** - Returns time-series data with timestamps: `{site: {metric: [[timestamp, value], ...]}}`
 - **`/api/v2/ts/table/`** - Returns aggregated data without timestamps: `{site: {metric: value}}`
-- **`/api/v2/ts/heatmap/`** - Returns hourly heatmap points for ONE site: `{site: {metric: [[day_of_year, hour, watts], ...]}}`
+- **`/api/v2/ts/heatmap/`** - Returns hourly heatmap points for ONE site: `{site: {metric: [[day_of_year, hour, watts], ...]}}`. Days are 1-365 on a non-leap calendar (Feb 29 is dropped), so the same date lines up across years. No `fleet` or `bin`.
 
 ### Sites
 
@@ -55,7 +55,8 @@ Every list endpoint (sites, fleets, IoTaWatts, metrics, switchboards, poles) acc
 ### Required Parameters
 
 #### `start` (string) - or `duration`
-Start time for the query (inclusive). Either `start` or `duration` is required.
+
+Start time for the query (inclusive). Give any two of `start`, `stop` and `duration`; `stop` alone defaults to now, so `start` or `duration` is required.
 
 **Formats:**
 
@@ -64,6 +65,7 @@ Start time for the query (inclusive). Either `start` or `duration` is required.
 - Epoch seconds: `1735668000`
 
 **Examples:**
+
 ```bash
 start="2025-01-01T00:00:00+10:00"    # ISO8601 with AEST
 start="2025-01-01T00:00:00Z"          # ISO8601 UTC
@@ -71,24 +73,31 @@ start=1735668000                      # Epoch seconds
 ```
 
 #### `stop` (string)
+
 End time for the query (exclusive). Defaults to now. Same formats as `start`.
 
 ```bash
 stop="2025-01-07T00:00:00+10:00"     # ISO8601
 ```
 
-#### `duration` (string) - instead of `start`
-Length of the query, ending at `stop` (or now). Do not combine with `start`.
+#### `duration` (string)
 
-**Formats:** pandas timedelta or plain seconds: `7d`, `24h`, `3600`
+Length of the query. With `start`, the window begins at `start`; otherwise it ends at `stop` (or now). Do not give all three of `start`, `stop` and `duration`.
+
+**Formats:** pandas offset, ISO 8601 duration or plain seconds: `7d`, `24h`, `P1D`, `3600`
 
 **Examples:**
+
 ```bash
 duration=7d                                       # last 7 days
 duration=24h stop="2025-01-07T00:00:00+10:00"     # 24 hours before stop
+duration=7d start="2025-01-01T00:00:00+10:00"     # 7 days from start
 ```
 
 #### `bin` (string) - Required for `/ts/series/` only
+
+Not used by `/ts/table/`. Rejected by `/ts/heatmap/`, which is always hourly.
+
 Time interval for grouping data points.
 
 **Valid values:**
@@ -101,6 +110,7 @@ Time interval for grouping data points.
 - Any pandas DateOffset string
 
 **Examples:**
+
 ```bash
 bin=1h      # Hourly bins
 bin=30min   # 30-minute bins
@@ -111,9 +121,11 @@ bin=1ME     # Monthly bins (month-end)
 ### Site Selection
 
 #### `sites` (string)
+
 Comma-separated list of site ids (the `id` field from `/api/v2/sites/`).
 
 **Examples:**
+
 ```bash
 sites=demo1                    # Single site
 sites=demo1,demo2              # Multiple sites
@@ -121,7 +133,8 @@ sites=demo1,demo2,demo3        # Three sites
 ```
 
 #### `fleet` (string)
-A fleet id, used instead of `sites`. Equivalent to listing every site in the fleet.
+
+A fleet id, used instead of `sites`. Equivalent to listing every site in the fleet. Not supported by `/ts/heatmap/` (one site only).
 
 ```bash
 fleet=myfleet
@@ -130,6 +143,7 @@ fleet=myfleet
 ### Metric Selection
 
 #### `mets` (string)
+
 Comma-separated list of metric/circuit names. A site's metrics are listed at `/api/v2/sites/{id}/metrics/`.
 
 **Common metrics:**
@@ -142,6 +156,7 @@ Comma-separated list of metric/circuit names. A site's metrics are listed at `/a
 - Circuit names: `AirConditioner`, `HotWater`, `Pool`, etc.
 
 **Examples:**
+
 ```bash
 mets=Production                        # Single metric
 mets=Production,Consumption            # Two metrics
@@ -149,6 +164,7 @@ mets=Production,Consumption,Export     # Three metrics
 ```
 
 #### `metcat` (string)
+
 Filter metrics by category instead of naming them explicitly.
 
 **Valid values:**
@@ -158,12 +174,13 @@ Filter metrics by category instead of naming them explicitly.
 - `battery` - `Battery`, `BatteryCharge`, `BatteryDischarge`
 - `net` - Grid: `Net`, `Import`, `Export`
 - `calc` - Calculated: `Consumption`, `FreeConsumption`, `ImportConsumption`, `Unmonitored`
-- `other` - Other circuits
+- `other` - Reserved; no metric currently has this category
 - `all` - Every metric
 
 Each metric belongs to exactly one category.
 
 **Example:**
+
 ```bash
 metcat=net                     # Net, Import, Export
 metcat=load                    # All load/consumption metrics
@@ -172,7 +189,8 @@ metcat=load                    # All load/consumption metrics
 ### Units and Attributes
 
 #### `units` (string)
-Units of measurement. Valid values: `W`, `kW`, `kWh/day`, `$/day`. Heatmap accepts `W` only.
+
+Units of measurement, for `attribute=power` only. Valid values: `W`, `kW`, `kWh/day`, `$/day`. Heatmap accepts `W` only.
 
 **For `/ts/series/`: average value across the bin interval**
 
@@ -186,6 +204,7 @@ Units of measurement. Valid values: `W`, `kW`, `kWh/day`, `$/day`. Heatmap accep
 - `$/day` - Dollars per day
 
 **Examples:**
+
 ```bash
 # Time-series with kilowatts
 /api/v2/ts/series/ ... units=kW
@@ -195,25 +214,30 @@ Units of measurement. Valid values: `W`, `kW`, `kWh/day`, `$/day`. Heatmap accep
 ```
 
 #### `attribute` (string)
-Physical attribute to query. Default is `power`. Other attributes are not yet fully tested.
 
-**Valid values:**
+Physical attribute to query. Default is `power`.
 
-- `power` (default) - Power measurements
-- `voltage` - Voltage measurements (beta)
-- `current` - Current measurements (beta)
-- `pf` - Power factor (beta)
-- `soc` - State of charge (batteries) (beta)
-- `status` - Status values (beta)
+| Endpoint | Valid values |
+| --- | --- |
+| `/ts/series/` | `power` (default), `soc` |
+| `/ts/table/` | `power` |
+| `/ts/heatmap/` | `power` |
 
+- `power` - Power measurements (see `units`)
+- `soc` - Battery state of charge, as a fraction from 0 to 1. Use with `mets=Battery`, `source=inverter` and `engine=timescale` (inverter data is stored in TimescaleDB). `units` does not apply.
 
+**Example:**
 
+```bash
+/api/v2/ts/series/ ... mets=Battery attribute=soc source=inverter engine=timescale
+```
 
 ### Output Format
 
 Responses are JSON. (v1's `format=csv` is not available in v2.)
 
 #### `timeformat` (string)
+
 Timestamp format in response.
 
 **Valid values:**
@@ -223,6 +247,7 @@ Timestamp format in response.
 - `epochms` - Unix timestamp (milliseconds)
 
 **Examples:**
+
 ```bash
 timeformat=iso                 # "2025-01-01T00:00:00+10:00"
 timeformat=epoch               # 1735668000
@@ -232,6 +257,7 @@ timeformat=epochms             # 1735668000000
 ### Timezone
 
 #### `timezone` (string)
+
 IANA timezone string for the query. Defaults to the first site's timezone.
 
 **Common timezones:**
@@ -242,6 +268,7 @@ IANA timezone string for the query. Defaults to the first site's timezone.
 - `UTC` - Coordinated Universal Time
 
 **Example:**
+
 ```bash
 timezone=Australia/Brisbane
 timezone=UTC
@@ -250,11 +277,13 @@ timezone=UTC
 ### Aggregation
 
 #### `function` (string) - `/ts/series/` and `/ts/table/`
+
 Aggregation function for binning. Only `mean` (the default) is currently accepted.
 
 ### Data Source
 
 #### `source` (string)
+
 Data source to query. Default is `iotawatt`.
 
 **Valid values:**
@@ -265,12 +294,14 @@ Data source to query. Default is `iotawatt`.
 - `calc` - Calculated data (beta)
 
 **Example:**
+
 ```bash
 source=iotawatt                # IoTaWatt (default)
 source=inverter                # Inverter data
 ```
 
 #### `engine` (string)
+
 Database engine to use. Default is `influx`.
 
 **Valid values:**
@@ -282,9 +313,11 @@ Database engine to use. Default is `influx`.
 ### Other Options
 
 #### `named` (boolean)
+
 Convert site ids to human-readable names in the response. Default is `false`.
 
 **Example:**
+
 ```bash
 named=true                     # Convert 'demo1' to 'Demo Device 01'
 ```

@@ -24,7 +24,7 @@ if not username or not password:
 
 # Authenticate
 auth_response = httpx.post(f"{base_url}/api/v2/token/", data={"username": username, "password": password})
-if auth_response.status_code != 200:
+if auth_response.status_code != httpx.codes.OK:
     print(f"Authentication failed: {auth_response.status_code}")
     sys.exit(1)
 
@@ -39,7 +39,10 @@ if not sites:
     print("No sites available for this account")
     sys.exit(1)
 # Prefer a site with configured metrics
-site_id = next((s["id"] for s in sites if client.get(f"/api/v2/sites/{s['id']}/metrics/").json()), sites[0]["id"])
+site_id = next(
+    (s["id"] for s in sites if client.get(f"/api/v2/sites/{s['id']}/metrics/").json()),
+    sites[0]["id"],
+)
 
 # Metrics: the measured circuits, whose names you pass to `mets=` in time-series queries.
 # Calculated metrics (Consumption, Import, Export, ...) are not listed but can still be queried.

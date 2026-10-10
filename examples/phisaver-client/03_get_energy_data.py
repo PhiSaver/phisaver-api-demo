@@ -32,7 +32,7 @@ if not sites:
     raise SystemExit("No sites available for this account")
 site = next((s for s in sites if get_metrics(s.id, client=client)), sites[0])
 site_id = site.id
-site_ids = [site_id] + [s.id for s in sites if s.id != site_id][:1]
+site_ids = [site_id, *[s.id for s in sites if s.id != site_id][:1]]
 
 # Time range: the 30 days before the site's latest data
 # last_data_at is None if the site has never reported data

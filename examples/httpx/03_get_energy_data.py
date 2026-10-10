@@ -27,7 +27,7 @@ if not username or not password:
 
 # Step 1: Authenticate
 auth_response = httpx.post(f"{base_url}/api/v2/token/", data={"username": username, "password": password})
-if auth_response.status_code != 200:
+if auth_response.status_code != httpx.codes.OK:
     print(f"Authentication failed: {auth_response.status_code}")
     sys.exit(1)
 
@@ -44,9 +44,12 @@ sites = client.get("/api/v2/sites/").json()
 if not sites:
     print("No sites available for this account")
     sys.exit(1)
-site = next((s for s in sites if client.get(f"/api/v2/sites/{s['id']}/metrics/").json()), sites[0])
+site = next(
+    (s for s in sites if client.get(f"/api/v2/sites/{s['id']}/metrics/").json()),
+    sites[0],
+)
 site_id = site["id"]
-site_ids = [site_id] + [s["id"] for s in sites if s["id"] != site_id][:1]
+site_ids = [site_id, *[s["id"] for s in sites if s["id"] != site_id][:1]]
 
 # Step 3: Choose a time range: the 30 days before the site's latest data
 # (falls back to the last 30 days if the site has never reported).
@@ -71,7 +74,7 @@ series_response = client.get(
     },
 )
 
-if series_response.status_code == 200:
+if series_response.status_code == httpx.codes.OK:
     print("\nSeries data retrieved:")
     print(json.dumps(series_response.json(), indent=4))
 else:
@@ -91,7 +94,7 @@ table_response = client.get(
     },
 )
 
-if table_response.status_code == 200:
+if table_response.status_code == httpx.codes.OK:
     print("\nTable data retrieved:")
     for site, metrics in table_response.json().items():
         print(f"  Site: {site}")
@@ -115,7 +118,7 @@ multi_response = client.get(
     },
 )
 
-if multi_response.status_code == 200:
+if multi_response.status_code == httpx.codes.OK:
     print("\nMetrics by category retrieved:")
     print(json.dumps(multi_response.json(), indent=4))
 else:
@@ -137,7 +140,7 @@ invalid_response = client.get(
     },
 )
 
-if invalid_response.status_code == 200:
+if invalid_response.status_code == httpx.codes.OK:
     print("Data retrieved (unexpected!)")
 else:
     print("OK: the expected error occurred.")

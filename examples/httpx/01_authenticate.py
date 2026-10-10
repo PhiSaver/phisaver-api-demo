@@ -25,7 +25,7 @@ response = httpx.post(
     data={"username": username, "password": password},
 )
 
-if response.status_code == 200:
+if response.status_code == httpx.codes.OK:
     token = response.json()["token"]
     print("Authentication successful!")
     print(f"Token: {token[:8]}...")
