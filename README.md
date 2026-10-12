@@ -1,14 +1,14 @@
 # Phisaver API Usage
 
-This folder contains sample code and documentation for using the PhiSaver API (v2).
+This folder contains sample code and documentation for using the PhiSaver API (v2.1.3).
 
 PhiSaver provides secure access to private energy data for residential and commercial solar installations. This document shows developers and researchers how to retrieve site information and time-series energy data.
 
-The API is described by a [schema](https://app.phisaver.com/api/v2/schema) using the OpenAPI v3 specification. A [Swagger UI](https://app.phisaver.com/api/v2/docs/) is available for exploration.
+The API is described by a [schema](https://app.phisaver.com/api/v2/schema) using the OpenAPI v3 specification. A [Swagger UI](https://app.phisaver.com/api/v2/) is available for exploration.
 
 All endpoints live under `/api/v2/`. See [Migrating from v1](#migrating-from-v1) if you used the earlier API.
 
-*Three* methods are documented to interact with the API:
+The best way to get started is to try the[Swagger UI](https://app.phisaver.com/api/v2/), then move to one of these three methods for code:
 
 1. Command-line HTTP
 2. Direct HTTP requests using Python
@@ -32,12 +32,11 @@ The demo account has an *unchanging* token for convenience. Production accounts 
 
 ## Quick Start
 
-The quickest way to explore the API is using [HTTPie](https://httpie.io/), a user-friendly command-line HTTP client. You could also use `curl` or `wget`.
+Apart from [Swagger UI](https://app.phisaver.com/api/v2/), the quickest way to explore the API is using [HTTPie](https://httpie.io/). 
 
 ```bash
 # Install HTTPie
 apt install httpie  # Linux (use brew on mac, or pip, and refer to note re certificates in FAQ)
-
 
 # Set credentials as environment variables
 export PS_API_URL="https://app.phisaver.com"
@@ -130,7 +129,6 @@ All endpoints are read-only `GET` requests unless noted.
 | `POST /api/v2/token/` | Exchange `username` + `password` for a token |
 | `/api/v2/sites/` | Sites you can access (filter: `id`, `name_prefix`, `data_status`, `solar_status`) |
 | `/api/v2/sites/{id}/` | Site detail: timezone, location, rates, metrics, switchboards, images |
-| `/api/v2/sites/{site_id}/metrics/` | Measured circuits at a site, with display name and category |
 | `/api/v2/sites/{site_id}/switchboards/` | Switchboards at a site, with their IoTaWatts |
 | `/api/v2/sites/{site_id}/switchboards/{id}/poles/` | Poles (circuit breakers) in a switchboard |
 | `/api/v2/sites/{site_id}/iotawatts/` | IoTaWatts at a site (same as `/api/v2/iotawatts/?site={site_id}`) |
