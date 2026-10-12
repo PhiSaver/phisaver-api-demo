@@ -8,7 +8,7 @@ The API is described by a [schema](https://app.phisaver.com/api/v2/schema) using
 
 All endpoints live under `/api/v2/`. See [Migrating from v1](#migrating-from-v1) if you used the earlier API.
 
-The best way to get started is to try the[Swagger UI](https://app.phisaver.com/api/v2/), then move to one of these three methods for code:
+The best way to get started is to try the [Swagger UI](https://app.phisaver.com/api/v2/), then move to one of these three methods for code:
 
 1. Command-line HTTP
 2. Direct HTTP requests using Python
