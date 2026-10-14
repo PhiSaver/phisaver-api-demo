@@ -11,7 +11,7 @@ jobs:
 
   examples:
     runs-on: ubuntu-latest
-    environment: Prod API Test
+    environment: prod
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
