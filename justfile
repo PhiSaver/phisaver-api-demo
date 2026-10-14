@@ -17,8 +17,8 @@ bin := venv / "bin"
 set dotenv-filename := "phisaver-api.env"
 set dotenv-load
 
-# Throttle: sleep this many ms before every API call (httpx via throttle/sitecustomize.py, HTTPie via `sleep`)
-export THROTTLE_SLEEP_MS := env_var_or_default("THROTTLE_SLEEP_MS", "100")
+# Throttle: sleep this many ms before every login/token request (httpx via throttle/sitecustomize.py, HTTPie via `sleep`)
+export THROTTLE_SLEEP_MS := env_var_or_default("THROTTLE_SLEEP_MS", "1000")
 export PYTHONPATH := justfile_directory() / "throttle"
 
 # Show this help message
@@ -72,7 +72,6 @@ _api-version: install _require-env
     #!/usr/bin/env bash
     set -eu
     token=$(just --justfile {{justfile()}} _access-token)
-    sleep "$(awk -v ms="$THROTTLE_SLEEP_MS" 'BEGIN{print ms/1000}')"
     {{bin}}/http --ignore-stdin --check-status --body --follow GET "${PS_API_URL%/}/api/v2/schema/" \
         format==json "Authorization:Bearer $token" \
         | {{bin}}/python -c 'import json, sys; print(json.load(sys.stdin)["info"]["version"].split()[0])'
@@ -115,7 +114,6 @@ update-schema: install _require-env
     #!/usr/bin/env bash
     set -eu
     token=$(just --justfile {{justfile()}} _access-token)
-    sleep "$(awk -v ms="$THROTTLE_SLEEP_MS" 'BEGIN{print ms/1000}')"
     {{bin}}/http --ignore-stdin --check-status --body --follow GET "${PS_API_URL%/}/api/v2/schema/" \
         "Authorization:Bearer $token" "Accept:application/vnd.oai.openapi" > schema.yml
     live=$(just --justfile {{justfile()}} _api-version)
