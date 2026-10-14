@@ -1,4 +1,7 @@
+
+
 # Phisaver API Usage
+[![CI](https://github.com/PhiSaver/phisaver-api-demo/actions/workflows/examples.yml/badge.svg)](https://github.com/PhiSaver/phisaver-api-demo/actions/workflows/examples.yml)
 
 This folder contains sample code and documentation for using the PhiSaver API. The examples are verified against the API version in [VERSION.txt](VERSION.txt).
 
