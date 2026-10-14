@@ -17,6 +17,10 @@ bin := venv / "bin"
 set dotenv-filename := "phisaver-api.env"
 set dotenv-load
 
+# Throttle: sleep this many ms before every API call (httpx via throttle/sitecustomize.py, HTTPie via `sleep`)
+export THROTTLE_SLEEP_MS := env_var_or_default("THROTTLE_SLEEP_MS", "100")
+export PYTHONPATH := justfile_directory() / "throttle"
+
 # Show this help message
 help:
     @echo "PhiSaver API Demo (API v{{api_version}}; dev only, not for general use)"
@@ -57,6 +61,7 @@ _require-env:
 _access-token: install _require-env
     #!/usr/bin/env bash
     set -eu
+    sleep "$(awk -v ms="$THROTTLE_SLEEP_MS" 'BEGIN{print ms/1000}')"
     {{bin}}/http --ignore-stdin --check-status --body POST "${PS_API_URL%/}/api/v2/token/" \
         email="$PS_API_USERNAME" password="$PS_API_PASSWORD" \
         | {{bin}}/python -c 'import json, sys; print(json.load(sys.stdin)["access"])'
@@ -67,6 +72,7 @@ _api-version: install _require-env
     #!/usr/bin/env bash
     set -eu
     token=$(just --justfile {{justfile()}} _access-token)
+    sleep "$(awk -v ms="$THROTTLE_SLEEP_MS" 'BEGIN{print ms/1000}')"
     {{bin}}/http --ignore-stdin --check-status --body --follow GET "${PS_API_URL%/}/api/v2/schema/" \
         format==json "Authorization:Bearer $token" \
         | {{bin}}/python -c 'import json, sys; print(json.load(sys.stdin)["info"]["version"].split()[0])'
@@ -78,6 +84,7 @@ clean:
 
 # Test HTTPie authentication (shows the access and refresh tokens)
 test-httpie: install _require-env
+    @sleep "$(awk -v ms="$THROTTLE_SLEEP_MS" 'BEGIN{print ms/1000}')"
     {{bin}}/http --ignore-stdin --check-status POST ${PS_API_URL%/}/api/v2/token/ email=$PS_API_USERNAME password=$PS_API_PASSWORD
 
 # Run all httpx examples
@@ -108,6 +115,7 @@ update-schema: install _require-env
     #!/usr/bin/env bash
     set -eu
     token=$(just --justfile {{justfile()}} _access-token)
+    sleep "$(awk -v ms="$THROTTLE_SLEEP_MS" 'BEGIN{print ms/1000}')"
     {{bin}}/http --ignore-stdin --check-status --body --follow GET "${PS_API_URL%/}/api/v2/schema/" \
         "Authorization:Bearer $token" "Accept:application/vnd.oai.openapi" > schema.yml
     live=$(just --justfile {{justfile()}} _api-version)
