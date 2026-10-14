@@ -49,9 +49,9 @@ detail = client.get(f"/api/v2/fleets/{fleet_id}/").json()
 print(f"\nFleet '{fleet_id}' details:")
 print(json.dumps(detail, indent=2)[:1500])
 
-# Daily energy for every site in the fleet, last 30 days
+# Daily energy for every site in the fleet, last 7 days
 end_date = datetime.now().astimezone()
-start_date = end_date - timedelta(days=30)
+start_date = end_date - timedelta(days=7)
 table = client.get(
     "/api/v2/ts/table/",
     params={
@@ -63,4 +63,4 @@ table = client.get(
     },
 )
 print(f"\nFleet table ({table.status_code}):")
-print(json.dumps(table.json(), indent=2))
+print(json.dumps(table.json(), indent=2)[:1500])

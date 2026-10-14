@@ -31,9 +31,9 @@ print(f"\nFleet '{fleet.id}' sites:")
 for site in fleet.sites:
     print(f"  {site.name} ({site.id})")
 
-# Daily energy for every site in the fleet, last 30 days
+# Daily energy for every site in the fleet, last 7 days
 end_date = datetime.now().astimezone()
-start_date = end_date - timedelta(days=30)
+start_date = end_date - timedelta(days=7)
 table = get_ts_table(
     client=client,
     fleet=fleet.id,  # Equivalent to sites=<every site in the fleet>
@@ -43,4 +43,4 @@ table = get_ts_table(
     units="kWh/day",
 )
 print("\nFleet table:")
-pprint.pprint(table.to_dict(), indent=4)
+print(pprint.pformat(table.to_dict(), indent=4)[:1500])

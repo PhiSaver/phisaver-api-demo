@@ -18,7 +18,7 @@ set dotenv-filename := "phisaver-api.env"
 set dotenv-load
 
 # Throttle: sleep this many ms before every login/token request (httpx via throttle/sitecustomize.py, HTTPie via `sleep`)
-export THROTTLE_SLEEP_MS := env_var_or_default("THROTTLE_SLEEP_MS", "1000")
+export THROTTLE_SLEEP_MS := env_var_or_default("THROTTLE_SLEEP_MS", "6000")
 export PYTHONPATH := justfile_directory() / "throttle"
 
 # Show this help message

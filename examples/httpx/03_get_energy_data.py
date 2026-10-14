@@ -45,17 +45,17 @@ if not sites:
     print("No sites available for this account")
     sys.exit(1)
 site = next(
-    (s for s in sites if client.get(f"/api/v2/sites/{s['id']}/metrics/").json()),
+    (s for s in sites[:3] if client.get(f"/api/v2/sites/{s['id']}/metrics/").json()),
     sites[0],
 )
 site_id = site["id"]
 site_ids = [site_id, *[s["id"] for s in sites if s["id"] != site_id][:1]]
 
-# Step 3: Choose a time range: the 30 days before the site's latest data
-# (falls back to the last 30 days if the site has never reported).
+# Step 3: Choose a time range: the 7 days before the site's latest data
+# (falls back to the last 7 days if the site has never reported).
 last_data_at = site["last_data_at"]
 end_date = datetime.fromisoformat(last_data_at) if last_data_at else datetime.now().astimezone()
-start_date = end_date - timedelta(days=30)
+start_date = end_date - timedelta(days=7)
 print(f"Querying {site_ids} from {start_date.isoformat()} to {end_date.isoformat()}")
 
 # Example 1: Time series data for two metrics.
@@ -76,7 +76,7 @@ series_response = client.get(
 
 if series_response.status_code == httpx.codes.OK:
     print("\nSeries data retrieved:")
-    print(json.dumps(series_response.json(), indent=4))
+    print(json.dumps(series_response.json(), indent=4)[:1500])
 else:
     print(f"Failed: {series_response.status_code}")
     print(series_response.text)
@@ -98,7 +98,7 @@ if table_response.status_code == httpx.codes.OK:
     print("\nTable data retrieved:")
     for site, metrics in table_response.json().items():
         print(f"  Site: {site}")
-        print(json.dumps(metrics, indent=4))
+        print(json.dumps(metrics, indent=4)[:1500])
 else:
     print(f"Failed: {table_response.status_code}")
     print(table_response.text)
@@ -120,7 +120,7 @@ multi_response = client.get(
 
 if multi_response.status_code == httpx.codes.OK:
     print("\nMetrics by category retrieved:")
-    print(json.dumps(multi_response.json(), indent=4))
+    print(json.dumps(multi_response.json(), indent=4)[:1500])
 else:
     print(f"Failed: {multi_response.status_code}")
     print(multi_response.text)
@@ -145,4 +145,4 @@ if invalid_response.status_code == httpx.codes.OK:
 else:
     print("OK: the expected error occurred.")
     print(f"Status: {invalid_response.status_code}")
-    print(invalid_response.text)
+    print(invalid_response.text[:500])

@@ -40,7 +40,7 @@ if not sites:
     sys.exit(1)
 # Prefer a site with configured metrics
 site_id = next(
-    (s["id"] for s in sites if client.get(f"/api/v2/sites/{s['id']}/metrics/").json()),
+    (s["id"] for s in sites[:3] if client.get(f"/api/v2/sites/{s['id']}/metrics/").json()),
     sites[0]["id"],
 )
 
@@ -55,7 +55,7 @@ print(f"\nSwitchboards for site '{site_id}':")
 switchboards = client.get(f"/api/v2/sites/{site_id}/switchboards/").json()
 if not switchboards:
     print("  (none)")
-for board in switchboards:
+for board in switchboards[:2]:
     print(f"  {board['name']} ({board['id']}): {board['pole_count']} pole(s)")
     for iotawatt in board["iotawatts"]:
         print(f"    IoTaWatt {iotawatt['id']}: {iotawatt['name']}")

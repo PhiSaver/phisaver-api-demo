@@ -30,14 +30,14 @@ client = get_client_from_env()
 sites = get_sites(client=client)
 if not sites:
     raise SystemExit("No sites available for this account")
-site = next((s for s in sites if get_metrics(s.id, client=client)), sites[0])
+site = next((s for s in sites[:3] if get_metrics(s.id, client=client)), sites[0])
 site_id = site.id
 site_ids = [site_id, *[s.id for s in sites if s.id != site_id][:1]]
 
-# Time range: the 30 days before the site's latest data
+# Time range: the 7 days before the site's latest data
 # last_data_at is None if the site has never reported data
 end_date = site.last_data_at or datetime.now().astimezone()
-start_date = end_date - timedelta(days=30)
+start_date = end_date - timedelta(days=7)
 print(f"Querying {site_ids} from {start_date.isoformat()} to {end_date.isoformat()}")
 
 # Example 1: Get time series data for two metrics
@@ -53,7 +53,7 @@ series = get_ts_series(
 
 # series[site][metric] -> [[timestamp, value], ...]
 print("\nSeries data retrieved:")
-pprint.pprint(series[site_id].to_dict(), indent=4)
+print(pprint.pformat(series[site_id].to_dict(), indent=4)[:1500])
 
 # Example 2: Get data in table format (one value per metric; easier for analysis)
 print("\n" + "=" * 60)
@@ -69,7 +69,7 @@ table = get_ts_table(
 print("\nTable data retrieved:")
 for site in table.additional_keys:
     print(f"  Site: {site}")
-    pprint.pprint(table[site].to_dict(), indent=4)
+    print(pprint.pformat(table[site].to_dict(), indent=4)[:1500])
 
 # Example 3: Get all metrics in a category
 print("\n" + "=" * 60)
@@ -84,7 +84,7 @@ multi_series = get_ts_series(
 )
 
 print("\nMetrics by category retrieved:")
-pprint.pprint(multi_series[site_id].to_dict(), indent=4)
+print(pprint.pformat(multi_series[site_id].to_dict(), indent=4)[:1500])
 
 # Example 4: View the error
 print("\n" + "=" * 60)

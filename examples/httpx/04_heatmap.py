@@ -34,14 +34,14 @@ client = httpx.Client(
     timeout=60,
 )
 
-# Pick the first site and the 30 days before its latest data
+# Pick the first site and the 7 days before its latest data
 sites = client.get("/api/v2/sites/").json()
 if not sites:
     print("No sites available for this account")
     sys.exit(1)
 site = sites[0]
 end_date = datetime.fromisoformat(site["last_data_at"]) if site["last_data_at"] else datetime.now().astimezone()
-start_date = end_date - timedelta(days=30)
+start_date = end_date - timedelta(days=7)
 
 print(f"Fetching heatmap for '{site['id']}'...")
 response = client.get(

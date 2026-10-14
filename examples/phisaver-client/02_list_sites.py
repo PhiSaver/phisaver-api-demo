@@ -19,7 +19,7 @@ print("Fetching all sites...")
 sites = get_sites(client=client)
 
 print(f"\nFound {len(sites)} site(s):\n")
-for site in sites:
+for site in sites[:5]:  # first few only
     print(f"  {site.name} ({site.id})")
     print(f"    Status: {site.site_status}  Data: {site.data_status}  Solar: {site.solar_status}")
     print(f"    Latest data: {site.last_data_at}")

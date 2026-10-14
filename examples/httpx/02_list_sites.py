@@ -43,7 +43,7 @@ sites_response.raise_for_status()
 sites = sites_response.json()
 print(f"Found {len(sites)} site(s)\n")
 
-for site in sites:
+for site in sites[:5]:  # first few only
     print(f"Site: {site['name']} ({site['id']})")
     print(f"  Status: {site['site_status']}  Data: {site['data_status']}  Solar: {site['solar_status']}")
     print(f"  Latest data: {site['last_data_at']}")
@@ -65,4 +65,4 @@ if sites:
     print(f"\nFetching details for site '{site_id}'...")
     detail = client.get(f"/api/v2/sites/{site_id}/")
     detail.raise_for_status()
-    print(json.dumps(detail.json(), indent=2))
+    print(json.dumps(detail.json(), indent=2)[:1500])

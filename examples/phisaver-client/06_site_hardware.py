@@ -22,7 +22,7 @@ sites = get_sites(client=client)
 if not sites:
     raise SystemExit("No sites available for this account")
 # Prefer a site with configured metrics
-site_id = next((s.id for s in sites if get_metrics(s.id, client=client)), sites[0].id)
+site_id = next((s.id for s in sites[:3] if get_metrics(s.id, client=client)), sites[0].id)
 
 # Metrics: the measured circuits, whose names you pass to `mets=` in time-series queries.
 # Calculated metrics (Consumption, Import, Export, ...) are not listed but can still be queried.
@@ -35,7 +35,7 @@ print(f"\nSwitchboards for site '{site_id}':")
 switchboards = get_switchboards(site_id, client=client)
 if not switchboards:
     print("  (none)")
-for board in switchboards:
+for board in switchboards[:2]:
     print(f"  {board.name} ({board.id}): {board.pole_count} pole(s)")
     for iotawatt in board.iotawatts:
         print(f"    IoTaWatt {iotawatt.id}: {iotawatt.name}")
