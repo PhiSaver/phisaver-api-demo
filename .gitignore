@@ -1,8 +1,6 @@
 phisaver-client-demo.code-workspace
 # Python
-*.env
 phisaver-api.env
-
 __pycache__/
 *.py[cod]
 *$py.class
