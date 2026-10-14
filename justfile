@@ -33,7 +33,9 @@ help:
 install:
     #!/usr/bin/env bash
     set -eu
-    
+    # Report on stderr: recipes depending on install capture stdout, e.g. token=$(just _access-token)
+    exec >&2
+
     test -d {{venv}} || python3 -m venv {{venv}}
     echo "Installing phisaver-client{{client_req}} and httpx, httpie, ruff"
     {{bin}}/pip install --quiet --disable-pip-version-check \
