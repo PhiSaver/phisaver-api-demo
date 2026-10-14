@@ -11,14 +11,14 @@ See the [main README](../../README.md#authentication) for credentials and authen
 Probably you want to use a virtual environment (venv, uv, conda, etc.), but that's not required.
 
 ```bash
-pip install "phisaver-client>=2.1"
+pip install "phisaver-client~=2.1.5"   # the API version in ../../VERSION.txt
 ```
 
 Version 2.x of the client targets the v2 API (`/api/v2/`). These examples need 2.1 or later. Version 1.x targets the retired v1 API.
 
 ## Usage
 
-Set your credentials as environment variables (see [.env.example](../../.env.example)):
+Set your credentials as environment variables (see [phisaver-api-example.env](../../phisaver-api-example.env)):
 
 ```bash
 export PS_API_URL="https://app.phisaver.com"

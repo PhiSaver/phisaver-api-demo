@@ -1,7 +1,8 @@
 """
 Authenticate with the PhiSaver API using httpx
 
-This example shows how to exchange a username and password for an API token.
+This example shows how to exchange your email and password for API tokens:
+a short-lived access token (15 minutes) and a refresh token (60 days).
 Get demo credentials at https://phisaver.com
 """
 
@@ -19,18 +20,20 @@ if not username or not password:
     print("Error: Set PS_API_USERNAME and PS_API_PASSWORD environment variables")
     sys.exit(1)
 
-# Authenticate: POST username/password (form-encoded) to /api/v2/token/
+# Authenticate: POST email/password (JSON) to /api/v2/token/
 response = httpx.post(
     f"{base_url}/api/v2/token/",
-    data={"username": username, "password": password},
+    json={"email": username, "password": password},
 )
 
 if response.status_code == httpx.codes.OK:
-    token = response.json()["token"]
+    tokens = response.json()
     print("Authentication successful!")
-    print(f"Token: {token[:8]}...")
-    print("\nUse this token in subsequent requests:")
-    print('  headers = {"Authorization": "Token <token>"}')
+    print(f"Access token: {tokens['access'][:8]}... (valid for 15 minutes)")
+    print("\nUse the access token in subsequent requests:")
+    print('  headers = {"Authorization": "Bearer <access>"}')
+    print("\nWhen it expires (401), get a new pair with the refresh token:")
+    print('  httpx.post(f"{base_url}/api/v2/token/refresh/", json={"refresh": "<refresh>"})')
 else:
     print(f"Authentication failed: {response.status_code}")
     print(response.text)

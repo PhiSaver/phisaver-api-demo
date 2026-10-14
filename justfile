@@ -1,77 +1,126 @@
-# Container settings
-container_name := "phisaver-demo"
-image_name := "localhost/phisaver-demo:latest"
-runtime := "podman"
-
-# PyPI index - set to "prod" to use main PyPI
-pypi_env := env_var_or_default("PYPI_ENV", "test")
+# PyPI index - set PYPI_ENV=test to use test PyPI
+pypi_env := env_var_or_default("PYPI_ENV", "prod")
 pypi_index := if pypi_env == "prod" { "https://pypi.org/simple/" } else { "https://test.pypi.org/simple/" }
 
-workspace := justfile_directory()
+# The API version these examples are verified against (SSOT: VERSION.txt).
+# Bump it by hand after re-verifying the examples against a new API (see `just check-api-version`).
+api_version := `tr -d '[:space:]' < VERSION.txt`
+
+# phisaver-client requirement: the client version follows the API, so pin to the verified version
+# (~=2.1.5 means >=2.1.5,<2.2). Override with PS_CLIENT_REQ, e.g. PS_CLIENT_REQ=">=2.1" just install
+client_req := env_var_or_default("PS_CLIENT_REQ", "~=" + api_version)
+
+venv := justfile_directory() / ".venv"
+bin := venv / "bin"
+
+# Load PS_API_* settings from phisaver-api.env (direnv does the same via .envrc; CI sets them directly)
+set dotenv-filename := "phisaver-api.env"
+set dotenv-load
 
 # Show this help message
 help:
-    @echo "PhiSaver API Demo (dev only, not for general use)"
+    @echo "PhiSaver API Demo (API v{{api_version}}; dev only, not for general use)"
     @echo "Recipes:"
     @just --justfile {{justfile()}} --list --unsorted --list-heading ''
     @echo ""
     @echo "Examples:"
-    @echo "  just build                  # Build with test.pypi.org"
-    @echo "  just pypi_env=prod build    # Build with pypi.org"
-    @echo "  just run                    # Run container interactively"
+    @echo "  just install                # Create .venv and install packages"
+    @echo "  PYPI_ENV=test just install  # Install from test.pypi.org"
+    @echo "  just smoke                  # Quick check against the API"
+    @echo "  just test-all               # Run all examples against the API"
 
-# Build the container image
-build:
-    @echo "Building container with {{pypi_env}} PyPI..."
-    @{{runtime}} build \
-        --build-arg PYPI_INDEX={{pypi_index}} \
-        -t {{image_name}} \
-        -f Containerfile \
-        --quiet \
-        . 2>&1 | tail -1
-    @echo "Container built successfully"
+# Create .venv and install packages
+install:
+    #!/usr/bin/env bash
+    set -eu
+    
+    test -d {{venv}} || python3 -m venv {{venv}}
+    echo "Installing phisaver-client{{client_req}} and httpx, httpie, ruff"
+    {{bin}}/pip install --quiet --disable-pip-version-check \
+        --index-url {{pypi_index}} --extra-index-url https://pypi.org/simple/ \
+        "phisaver-client{{client_req}}" httpx httpie ruff
+    if [ ! -f phisaver-api.env ]; then
+        cp phisaver-api-example.env phisaver-api.env
+        echo "Created phisaver-api.env from phisaver-api-example.env"
+        echo "Edit it, to suit."
+    fi
+    echo "'just test-all' to verify the examples against the API"
 
-# Run container interactively
-run: build
-    {{runtime}} run --replace -it \
-        --name {{container_name}} \
-        -v {{workspace}}:/workspace \
-        {{image_name}}
+[private]
+_require-env:
+    @test -n "${PS_API_USERNAME:-}" -a -n "${PS_API_PASSWORD:-}" || { echo "PS_API_USERNAME/PS_API_PASSWORD not set: create phisaver-api.env from phisaver-api-example.env"; exit 1; }
 
-# Remove container and image
+# Print a short-lived access token: sign in with email + password (JSON) at /api/v2/token/
+[private]
+_access-token: install _require-env
+    #!/usr/bin/env bash
+    set -eu
+    {{bin}}/http --ignore-stdin --check-status --body POST "${PS_API_URL%/}/api/v2/token/" \
+        email="$PS_API_USERNAME" password="$PS_API_PASSWORD" \
+        | {{bin}}/python -c 'import json, sys; print(json.load(sys.stdin)["access"])'
+
+# Print the live API's version: info.version of its OpenAPI schema (JSON, read with the stdlib)
+[private]
+_api-version: install _require-env
+    #!/usr/bin/env bash
+    set -eu
+    token=$(just --justfile {{justfile()}} _access-token)
+    {{bin}}/http --ignore-stdin --check-status --body --follow GET "${PS_API_URL%/}/api/v2/schema/" \
+        format==json "Authorization:Bearer $token" \
+        | {{bin}}/python -c 'import json, sys; print(json.load(sys.stdin)["info"]["version"].split()[0])'
+
+# Remove .venv
 clean:
-    -{{runtime}} rm -f {{container_name}}
-    -{{runtime}} rmi {{image_name}}
-    @echo "Cleaned up container and image"
+    rm -rf {{venv}}
+    @echo "Removed {{venv}}"
 
-# Test HTTPie authentication
-test-httpie: build
-    @echo "Testing HTTPie authentication..."
-    @{{runtime}} run --replace --name {{container_name}} -it \
-        -v {{workspace}}:/workspace \
-        {{image_name}} \
-        bash -c 'set -a && source .env && set +a && http --ignore-stdin -f POST $PS_API_URL/api/v2/token/ username=$PS_API_USERNAME password=$PS_API_PASSWORD'
+# Test HTTPie authentication (shows the access and refresh tokens)
+test-httpie: install _require-env
+    {{bin}}/http --ignore-stdin --check-status POST ${PS_API_URL%/}/api/v2/token/ email=$PS_API_USERNAME password=$PS_API_PASSWORD
 
 # Run all httpx examples
-test-httpx: build
-    @echo "Testing httpx example..."
-    @{{runtime}} run --replace --name {{container_name}} -it \
-        -v {{workspace}}:/workspace \
-        {{image_name}} \
-        bash -c 'set -a && source .env && set +a && for f in examples/httpx/0*.py; do echo "== $f"; python $f || exit 1; done'
+test-httpx: install _require-env
+    for f in examples/httpx/0*.py; do echo "== $f"; {{bin}}/python $f || exit 1; done
 
 # Run all phisaver-client examples
-test-client: build
-    @echo "Testing phisaver-client example..."
-    @{{runtime}} run --replace --name {{container_name}} -it \
-        -v {{workspace}}:/workspace \
-        {{image_name}} \
-        bash -c 'set -a && source .env && set +a && for f in examples/phisaver-client/0*.py; do echo "== $f"; python $f || exit 1; done'
+test-client: install _require-env
+    for f in examples/phisaver-client/0*.py; do echo "== $f"; {{bin}}/python $f || exit 1; done
 
 # Run all tests
 test-all: test-httpie test-httpx test-client
 
-# Update OpenAPI schema file (dev only)
-update-schema:
-    cp ../phisaver/server/schema.yml .
-    head -5 schema.yml
+# Fail if the live API's version differs from the one these examples are verified against (VERSION.txt)
+check-api-version: install _require-env
+    #!/usr/bin/env bash
+    set -eu
+    live=$(just --justfile {{justfile()}} _api-version)
+    if [ "$live" != "{{api_version}}" ]; then
+        echo "Live API at $PS_API_URL is $live, but the examples are verified against {{api_version}} (VERSION.txt)."
+        echo "Re-verify the examples against $live ('just test-all'), then set VERSION.txt to $live."
+        exit 1
+    fi
+    echo "API version {{api_version}} OK ($PS_API_URL)"
+
+# Download the OpenAPI schema (HTTPie only; needs credentials) and show its version
+update-schema: install _require-env
+    #!/usr/bin/env bash
+    set -eu
+    token=$(just --justfile {{justfile()}} _access-token)
+    {{bin}}/http --ignore-stdin --check-status --body --follow GET "${PS_API_URL%/}/api/v2/schema/" \
+        "Authorization:Bearer $token" "Accept:application/vnd.oai.openapi" > schema.yml
+    live=$(just --justfile {{justfile()}} _api-version)
+    echo "schema.yml = API $live; examples are verified against {{api_version}} (VERSION.txt)"
+    if [ "$live" != "{{api_version}}" ]; then
+        echo "To move to $live: update the examples, 'just test-all', then set VERSION.txt to $live"
+    fi
+
+# Smoke test: authenticate, then the first example of each kind (fast, read-only)
+smoke: install _require-env
+    just --justfile {{justfile()}} _access-token > /dev/null
+    {{bin}}/python examples/httpx/01_authenticate.py
+    {{bin}}/python examples/phisaver-client/01_authenticate.py
+
+# Lint and format-check the examples
+lint: install
+    {{bin}}/ruff check examples
+    {{bin}}/ruff format --check examples

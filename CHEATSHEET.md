@@ -6,7 +6,9 @@ Cheatsheet for PhiSaver API (v2) query parameters and usage patterns.
 
 ### Authentication
 
-- **`POST /api/v2/token/`** - Exchange `username` and `password` (form-encoded) for `{"token": ...}`. Send `Authorization: Token <token>` on every request.
+- **`POST /api/v2/token/`** - Exchange `email` and `password` (JSON) for `{"access": ..., "refresh": ...}`. Send `Authorization: Bearer <access>` on every request; the access token lasts 15 minutes.
+- **`POST /api/v2/token/refresh/`** - Exchange `{"refresh": ...}` for a new pair (each refresh token works once)
+- API keys from an operator are sent as `Authorization: Token <key>` and are read-only
 - **`POST /api/v2/login/`** - Session login (`email` + `password`), e.g. for HTTPie sessions
 
 ### Time-Series Data
@@ -45,8 +47,10 @@ Every list endpoint (sites, fleets, IoTaWatts, metrics, switchboards, poles) acc
 `/api/v2/sites/` also accepts the filters below. Each takes a single value or comma-separated values.
 
 - `name_prefix` - Case-insensitive site name prefix
-- `data_status` - `Active`, `RecentlyInactive`, `Inactive`, `NotStarted`, `Unknown`
-- `solar_status` - `Active`, `SubOptimal`, `Inactive`, `NotPresent`, `Unknown`
+- `data_status` - `active`, `recently_inactive`, `inactive`, `not_started`, `unknown`
+- `solar_status` - `active`, `sub_optimal`, `inactive`, `not_present`, `unknown`
+
+Sites also report `site_status`: `ok`, `not_commissioned`, `not_installed`, `error`, `decommissioned`, `unknown`.
 
 ## Common Time-Series Parameters
 

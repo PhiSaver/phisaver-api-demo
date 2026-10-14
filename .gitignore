@@ -1,5 +1,8 @@
 phisaver-client-demo.code-workspace
 # Python
+*.env
+phisaver-api.env
+
 __pycache__/
 *.py[cod]
 *$py.class
@@ -36,7 +39,7 @@ ENV/
 
 # Environment variables
 .env
-.envrc
+phisaver-api.env
 
 # OS
 .DS_Store

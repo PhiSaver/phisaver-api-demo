@@ -11,7 +11,7 @@ import httpx
 from phisaver_client.helpers import get_client_from_env
 
 # Using environment variables (recommended over hardcoding)
-# Set these in your environment (e.g., in your shell or .env file):
+# Set these in your environment (e.g., in your shell or phisaver-api.env):
 # PS_API_URL=https://app.phisaver.com
 # PS_API_USERNAME=demo@phisaver.com
 # PS_API_PASSWORD=your_password

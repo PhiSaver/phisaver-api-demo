@@ -27,11 +27,11 @@ export PS_API_PASSWORD="checkthewebsiteoremailsupport"
 
 ## 01. Authentication
 
-Exchange your username and password for an API token (`-f` sends a form, as the token endpoint expects):
+Exchange your email and password for tokens (HTTPie sends JSON by default):
 
 ```bash
-http -f POST $PS_API_URL/api/v2/token/ \
-  username="$PS_API_USERNAME" \
+http POST $PS_API_URL/api/v2/token/ \
+  email="$PS_API_USERNAME" \
   password="$PS_API_PASSWORD"
 ```
 
@@ -39,22 +39,33 @@ http -f POST $PS_API_URL/api/v2/token/ \
 
 ```json
 {
-    "token": "abc123def456..."
+    "access": "eyJhbGciOi...",
+    "refresh": "eyJhbGciOi..."
 }
 ```
 
-**Save the token:**
+The `access` token is valid for 15 minutes; the `refresh` token for 60 days.
+
+**Save the access token:**
 
 ```bash
-export TOKEN=$(http -f POST $PS_API_URL/api/v2/token/ \
-  username="$PS_API_USERNAME" \
+export TOKEN=$(http POST $PS_API_URL/api/v2/token/ \
+  email="$PS_API_USERNAME" \
   password="$PS_API_PASSWORD" \
-  | python3 -c "import sys, json; print(json.load(sys.stdin)['token'])")
+  | python3 -c "import sys, json; print(json.load(sys.stdin)['access'])")
 
 echo "Token: $TOKEN"
 ```
 
-Send it on every request as `"Authorization:Token $TOKEN"`.
+Send it on every request as `"Authorization:Bearer $TOKEN"`.
+
+**When it expires** (401 response), get a new pair with the refresh token. Each refresh token works once:
+
+```bash
+http POST $PS_API_URL/api/v2/token/refresh/ refresh="$REFRESH"
+```
+
+**API keys:** an operator can issue a long-lived key for a service account. Send it as `"Authorization:Token <key>"`. Keys are read-only.
 
 **Alternative: HTTPie Sessions (cookie-based):**
 
@@ -78,7 +89,7 @@ List all sites your account can access:
 
 ```bash
 http GET $PS_API_URL/api/v2/sites/ \
-  "Authorization:Token $TOKEN"
+  "Authorization:Bearer $TOKEN"
 ```
 
 Each site has an `id` (e.g. `demo1`) - use it in `sites==` for time-series queries.
@@ -87,18 +98,22 @@ Each site has an `id` (e.g. `demo1`) - use it in `sites==` for time-series queri
 
 ```bash
 http GET $PS_API_URL/api/v2/sites/ \
-  "Authorization:Token $TOKEN" \
+  "Authorization:Bearer $TOKEN" \
   name_prefix==Fac \
-  data_status==Active,RecentlyInactive
+  data_status==active,recently_inactive
 ```
 
-Status values: `data_status` is one of `Active`, `RecentlyInactive`, `Inactive`, `NotStarted`, `Unknown`; `solar_status` is one of `Active`, `SubOptimal`, `Inactive`, `NotPresent`, `Unknown`.
+Status values:
+
+- `site_status`: `ok`, `not_commissioned`, `not_installed`, `error`, `decommissioned`, `unknown`
+- `data_status`: `active`, `recently_inactive`, `inactive`, `not_started`, `unknown`
+- `solar_status`: `active`, `sub_optimal`, `inactive`, `not_present`, `unknown`
 
 **Get a specific site** (rates, location, metrics, switchboards, images):
 
 ```bash
 http GET $PS_API_URL/api/v2/sites/demo1/ \
-  "Authorization:Token $TOKEN"
+  "Authorization:Bearer $TOKEN"
 ```
 
 ## 03. Get Energy Data
@@ -117,7 +132,7 @@ Replace `demo1`/`demo2` with site ids from your account, and pick dates where th
 
 ```bash
 http GET $PS_API_URL/api/v2/ts/series/ \
-  "Authorization:Token $TOKEN" \
+  "Authorization:Bearer $TOKEN" \
   sites==demo1 \
   start=="2025-01-01T00:00:00+10:00" \
   stop=="2025-01-07T00:00:00+10:00" \
@@ -132,7 +147,7 @@ Get one aggregated value per metric for multiple sites:
 
 ```bash
 http GET $PS_API_URL/api/v2/ts/table/ \
-  "Authorization:Token $TOKEN" \
+  "Authorization:Bearer $TOKEN" \
   sites==demo1,demo2 \
   start=="2025-01-01T00:00:00+10:00" \
   stop=="2025-01-07T00:00:00+10:00" \
@@ -145,7 +160,7 @@ Query all metrics in a category (e.g., all load circuits):
 
 ```bash
 http GET $PS_API_URL/api/v2/ts/series/ \
-  "Authorization:Token $TOKEN" \
+  "Authorization:Bearer $TOKEN" \
   sites==demo1 \
   start=="2025-01-01T00:00:00+10:00" \
   stop=="2025-01-07T00:00:00+10:00" \
@@ -160,7 +175,7 @@ Attempt an invalid query to see error response:
 
 ```bash
 http GET $PS_API_URL/api/v2/ts/series/ \
-  "Authorization:Token $TOKEN" \
+  "Authorization:Bearer $TOKEN" \
   sites==demo1 \
   start=="2025-01-01T00:00:00+10:00" \
   stop=="2025-01-07T00:00:00+10:00" \
@@ -177,7 +192,7 @@ This will return a 400 response showing which parameters are invalid.
 
 ```bash
 http GET $PS_API_URL/api/v2/ts/heatmap/ \
-  "Authorization:Token $TOKEN" \
+  "Authorization:Bearer $TOKEN" \
   sites==demo1 \
   start=="2025-01-01T00:00:00+10:00" \
   stop=="2025-01-03T00:00:00+10:00" \
@@ -190,14 +205,14 @@ A fleet is a named group of sites.
 
 ```bash
 # List fleets
-http GET $PS_API_URL/api/v2/fleets/ "Authorization:Token $TOKEN"
+http GET $PS_API_URL/api/v2/fleets/ "Authorization:Bearer $TOKEN"
 
 # Fleet details, including its sites
-http GET $PS_API_URL/api/v2/fleets/myfleet/ "Authorization:Token $TOKEN"
+http GET $PS_API_URL/api/v2/fleets/myfleet/ "Authorization:Bearer $TOKEN"
 
 # Use fleet== in place of sites== in any time-series query
 http GET $PS_API_URL/api/v2/ts/table/ \
-  "Authorization:Token $TOKEN" \
+  "Authorization:Bearer $TOKEN" \
   fleet==myfleet \
   duration==7d \
   units==kWh/day
@@ -207,19 +222,19 @@ http GET $PS_API_URL/api/v2/ts/table/ \
 
 ```bash
 # Metrics (circuits) at a site, with category - use these names in mets==
-http GET $PS_API_URL/api/v2/sites/demo1/metrics/ "Authorization:Token $TOKEN"
+http GET $PS_API_URL/api/v2/sites/demo1/metrics/ "Authorization:Bearer $TOKEN"
 
 # Switchboards at a site (each lists its IoTaWatts), then one switchboard's poles (circuit breakers)
-http GET $PS_API_URL/api/v2/sites/demo1/switchboards/ "Authorization:Token $TOKEN"
-http GET $PS_API_URL/api/v2/sites/demo1/switchboards/<switchboard_id>/poles/ "Authorization:Token $TOKEN"
+http GET $PS_API_URL/api/v2/sites/demo1/switchboards/ "Authorization:Bearer $TOKEN"
+http GET $PS_API_URL/api/v2/sites/demo1/switchboards/<switchboard_id>/poles/ "Authorization:Bearer $TOKEN"
 
 # IoTaWatt energy monitors at a site
-http GET $PS_API_URL/api/v2/sites/demo1/iotawatts/ "Authorization:Token $TOKEN"
+http GET $PS_API_URL/api/v2/sites/demo1/iotawatts/ "Authorization:Bearer $TOKEN"
 
 # All IoTaWatts you can access (site== narrows to some sites), and one in detail (CTs, VT, phases)
-http GET $PS_API_URL/api/v2/iotawatts/ "Authorization:Token $TOKEN"
-http GET $PS_API_URL/api/v2/iotawatts/ "Authorization:Token $TOKEN" site==demo1,demo2
-http GET $PS_API_URL/api/v2/iotawatts/<iotawatt_id>/ "Authorization:Token $TOKEN"
+http GET $PS_API_URL/api/v2/iotawatts/ "Authorization:Bearer $TOKEN"
+http GET $PS_API_URL/api/v2/iotawatts/ "Authorization:Bearer $TOKEN" site==demo1,demo2
+http GET $PS_API_URL/api/v2/iotawatts/<iotawatt_id>/ "Authorization:Bearer $TOKEN"
 ```
 
 `/sites/demo1/metrics/` lists the site's measured circuits. Calculated metrics (`Consumption`, `Import`, `Export`, ...) are not listed, but you can still query them in `mets==`.
@@ -227,8 +242,8 @@ http GET $PS_API_URL/api/v2/iotawatts/<iotawatt_id>/ "Authorization:Token $TOKEN
 **Select items by id.** Every list accepts `id==` with one id or comma-separated ids:
 
 ```bash
-http GET $PS_API_URL/api/v2/sites/demo1/metrics/ "Authorization:Token $TOKEN" id==Net,Production
-http GET $PS_API_URL/api/v2/fleets/ "Authorization:Token $TOKEN" id==myfleet
+http GET $PS_API_URL/api/v2/sites/demo1/metrics/ "Authorization:Bearer $TOKEN" id==Net,Production
+http GET $PS_API_URL/api/v2/fleets/ "Authorization:Bearer $TOKEN" id==myfleet
 ```
 
 ## Tips
@@ -237,14 +252,14 @@ http GET $PS_API_URL/api/v2/fleets/ "Authorization:Token $TOKEN" id==myfleet
 
 ```bash
 http GET $PS_API_URL/api/v2/sites/ \
-  "Authorization:Token $TOKEN" > sites.json
+  "Authorization:Bearer $TOKEN" > sites.json
 ```
 
 **Epoch timestamps** (easier for plotting/spreadsheets):
 
 ```bash
 http GET $PS_API_URL/api/v2/ts/series/ \
-  "Authorization:Token $TOKEN" \
+  "Authorization:Bearer $TOKEN" \
   sites==demo1 \
   duration==7d \
   bin==1d \
@@ -257,7 +272,7 @@ http GET $PS_API_URL/api/v2/ts/series/ \
 
 ```bash
 http -v GET $PS_API_URL/api/v2/sites/ \
-  "Authorization:Token $TOKEN"
+  "Authorization:Bearer $TOKEN"
 ```
 
 ## Query Parameters

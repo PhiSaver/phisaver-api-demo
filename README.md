@@ -1,6 +1,6 @@
 # Phisaver API Usage
 
-This folder contains sample code and documentation for using the PhiSaver API (v2.1.3).
+This folder contains sample code and documentation for using the PhiSaver API. The examples are verified against the API version in [VERSION.txt](VERSION.txt).
 
 PhiSaver provides secure access to private energy data for residential and commercial solar installations. This document shows developers and researchers how to retrieve site information and time-series energy data.
 
@@ -20,9 +20,9 @@ For advanced users, OpenAPI clients can be auto-generated for other languages. T
 
 The API requires authentication for all requests.
 
-Existing users can use their email and password to access their data. Exchange them for a token at `POST /api/v2/token/`, then send `Authorization: Token <token>` on every request.
+Existing users can use their email and password to access their data. Exchange them at `POST /api/v2/token/` (JSON `{"email": ..., "password": ...}`) for an `access` token (valid 15 minutes) and a `refresh` token (valid 60 days). Send `Authorization: Bearer <access>` on every request. When the access token expires (401), `POST /api/v2/token/refresh/` with `{"refresh": ...}` returns a new pair; each refresh token works once.
 
-The demo account has an *unchanging* token for convenience. Production accounts will have rotating tokens.
+Service accounts can instead use a long-lived API key issued by an operator, sent as `Authorization: Token <key>`. API keys are read-only.
 
 **Demo Credentials**:
 
@@ -43,18 +43,18 @@ export PS_API_URL="https://app.phisaver.com"
 export PS_API_USERNAME="your_email@example.com"
 export PS_API_PASSWORD="your_password"
 
-# Authenticate and save token
-export TOKEN=$(http -f POST $PS_API_URL/api/v2/token/ \
-  username="$PS_API_USERNAME" \
+# Authenticate and save the access token (valid 15 minutes)
+export TOKEN=$(http POST $PS_API_URL/api/v2/token/ \
+  email="$PS_API_USERNAME" \
   password="$PS_API_PASSWORD" \
-  | python3 -c "import sys, json; print(json.load(sys.stdin)['token'])")
+  | python3 -c "import sys, json; print(json.load(sys.stdin)['access'])")
 
 # List the sites you can access (note each site's "id")
-http GET $PS_API_URL/api/v2/sites/ "Authorization:Token $TOKEN"
+http GET $PS_API_URL/api/v2/sites/ "Authorization:Bearer $TOKEN"
 
 # Get time-series energy data
 http GET $PS_API_URL/api/v2/ts/series/ \
-  "Authorization:Token $TOKEN" \
+  "Authorization:Bearer $TOKEN" \
   sites==demo1 \
   start=="2025-01-01T00:00:00+10:00" \
   stop=="2025-01-07T00:00:00+10:00" \
@@ -62,6 +62,17 @@ http GET $PS_API_URL/api/v2/ts/series/ \
   mets==Production \
   units==kWh/day
 ```
+
+## Running the Examples
+
+```bash
+cp phisaver-api-example.env phisaver-api.env   # then edit with real credentials
+just install    # creates .venv, installs phisaver-client, httpx, httpie, ruff
+just smoke      # quick authentication check
+just test-all   # run every example against the API
+```
+
+For an interactive shell with the tools on your path: `source .venv/bin/activate`, then `set -a; source phisaver-api.env; set +a` (or use direnv: `.envrc` loads `phisaver-api.env`).
 
 ## Three Ways to Interact with the PhiSaver API
 
@@ -107,12 +118,12 @@ More:
 
 **Best for**: Type-safe Python applications, IDE autocomplete, generated from OpenAPI spec
 
-Auto-generated Python client library with type hints and full API coverage. Version 2.x targets the v2 API; these examples need 2.1 or later.
+Auto-generated Python client library with type hints and full API coverage. The client's version matches the API version it was generated from; these examples use the version in [VERSION.txt](VERSION.txt) (`just install` pins `phisaver-client~=<that version>`).
 
 **Installation:**
 
 ```bash
-pip install "phisaver-client>=2.1"
+pip install "phisaver-client~=2.1.5"   # the version in VERSION.txt
 ```
 
 More:
@@ -126,7 +137,8 @@ All endpoints are read-only `GET` requests unless noted.
 
 | Endpoint | Description |
 | --- | --- |
-| `POST /api/v2/token/` | Exchange `username` + `password` for a token |
+| `POST /api/v2/token/` | Exchange `email` + `password` (JSON) for `access` and `refresh` tokens |
+| `POST /api/v2/token/refresh/` | Exchange a `refresh` token for a new pair |
 | `/api/v2/sites/` | Sites you can access (filter: `id`, `name_prefix`, `data_status`, `solar_status`) |
 | `/api/v2/sites/{id}/` | Site detail: timezone, location, rates, metrics, switchboards, images |
 | `/api/v2/sites/{site_id}/switchboards/` | Switchboards at a site, with their IoTaWatts |
@@ -281,7 +293,7 @@ bin==1d start=="2025-01-01T00:00:00+10:00" stop=="2025-01-07T00:00:00+10:00"
 
 | v1 | v2 |
 | --- | --- |
-| `POST /api/v1/login/` with `email`, returns `{"key": ...}` | `POST /api/v2/token/` with `username` (form), returns `{"token": ...}` |
+| `POST /api/v1/login/` with `email`, returns `{"key": ...}` | `POST /api/v2/token/` with `email` (JSON), returns `{"access": ..., "refresh": ...}`; send `Authorization: Bearer <access>` |
 | `/api/v1/devices/`, `/api/v1/devices/{ref}/` | `/api/v2/sites/`, `/api/v2/sites/{id}/` |
 | Device field `ref` | Site field `id` |
 | `/api/v1/ts/series/`, `/api/v1/ts/table/` | `/api/v2/ts/series/`, `/api/v2/ts/table/` (same parameters) |
@@ -302,6 +314,21 @@ New in v2: `/ts/heatmap/`, fleets, site metrics, switchboards, poles and IoTaWat
 - `/ts/heatmap/` rejects `fleet` and `bin`, and maps leap years onto a 365-day calendar (Feb 29 dropped).
 - `/api/v2/sites/{site_id}/metrics/` lists measured circuits only. Calculated metrics such as `Consumption` can still be queried.
 - `phisaver-client` 2.1: `get_client()` and `get_client_from_env()` raise `errors.UnexpectedStatus` on any error response (e.g. 400, 404, 500), including from `sync_detailed()`. Pass `raise_on_unexpected_status=False` to get the previous behaviour. `get_client_from_env()` raises `RuntimeError` if a `PS_API_*` variable is missing.
+
+### Changes in 2.1.5
+
+- **Sign-in uses JWT.** `POST /api/v2/token/` takes JSON `{"email", "password"}` and returns `{"access", "refresh"}`. Send `Authorization: Bearer <access>`. The access token lasts 15 minutes; renew with `POST /api/v2/token/refresh/` (`{"refresh": ...}`), which returns a new pair. Each refresh token works once.
+- **`Authorization: Token <key>` is now for read-only API keys** issued by an operator, not for user sign-in.
+- **Status values are snake_case** and documented as enums in the schema:
+
+  | Field | 2.1 | 2.1.5 |
+  | --- | --- | --- |
+  | `site_status` | `OK`, `NotCommissioned`, `NotYetReady`, `Error`, `Decommissioned`, `Unknown` | `ok`, `not_commissioned`, `not_installed`, `error`, `decommissioned`, `unknown` |
+  | `data_status` | `Active`, `RecentlyInactive`, `Inactive`, `NotStarted`, `Unknown` | `active`, `recently_inactive`, `inactive`, `not_started`, `unknown` |
+  | `solar_status` | `Active`, `SubOptimal`, `Inactive`, `NotPresent`, `Unknown` | `active`, `sub_optimal`, `inactive`, `not_present`, `unknown` |
+
+  The `data_status` and `solar_status` filters on `/api/v2/sites/` take the new values.
+- `phisaver-client` 2.1.5: `get_client()` signs in with JWT and renews the access token automatically. It checks status values against the schema, so use it with a 2.1.5 API (an older API's `Active` raises an error).
 
 ## FAQ
 

@@ -1,0 +1,33 @@
+name: examples
+
+on:
+  schedule:
+    - cron: "0 20 * * 0"  # weekly
+  workflow_dispatch:
+  push:
+    branches: [main]
+
+jobs:
+  examples:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: extractions/setup-just@v2
+      - name: Lint
+        run: just lint
+      # The examples are verified against the API version in VERSION.txt: fail clearly if the live API differs
+      - name: Check the live API version
+        env:
+          PS_API_URL: https://app.phisaver.com
+          PS_API_USERNAME: ${{ secrets.PS_API_USERNAME }}
+          PS_API_PASSWORD: ${{ secrets.PS_API_PASSWORD }}
+        run: just check-api-version
+      - name: Run examples against the live API
+        env:
+          PS_API_URL: https://app.phisaver.com
+          PS_API_USERNAME: ${{ secrets.PS_API_USERNAME }}
+          PS_API_PASSWORD: ${{ secrets.PS_API_PASSWORD }}
+        run: just test-all
